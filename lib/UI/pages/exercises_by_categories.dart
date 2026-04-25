@@ -2,30 +2,37 @@ import 'package:business_ia/infrastructure/services/firebase/exercises_service.d
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class ExercisesByCategories extends StatelessWidget {
+class ExercisesByCategories extends StatefulWidget {
   final String categoria;
   const ExercisesByCategories({required this.categoria, super.key});
 
-  Future<List<Map<String, dynamic>>> obtenerEjercicios() async {
-    return EjercicioService().obtenerPorCategoria(categoria);
+  @override
+  State<ExercisesByCategories> createState() => _ExercisesByCategoriesState();
+}
+
+class _ExercisesByCategoriesState extends State<ExercisesByCategories> {
+  late final Future<List<Map<String, dynamic>>> _ejerciciosFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _ejerciciosFuture = EjercicioService().obtenerPorCategoria(widget.categoria);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(categoria),
+        title: Text(widget.categoria),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () {
-              context.push('/add-exercise');
-            },
+            onPressed: () => context.push('/add-exercise'),
           ),
         ],
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: obtenerEjercicios(),
+        future: _ejerciciosFuture,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -42,9 +49,7 @@ class ExercisesByCategories extends StatelessWidget {
                   ejercicio['descripcion'] ?? '',
                   style: const TextStyle(color: Colors.grey),
                 ),
-                onTap: () {
-                  Navigator.pop(context, ejercicio); // ✅ ya contiene el id
-                },
+                onTap: () => Navigator.pop(context, ejercicio),
               );
             },
           );

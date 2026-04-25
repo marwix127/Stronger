@@ -47,7 +47,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
     super.dispose();
   }
 
-  double? parseMeasurement(String value) {
+  double? _parseMeasurement(String value) {
     final normalizedValue = value.trim().replaceAll(',', '.');
     return double.tryParse(normalizedValue);
   }
@@ -59,10 +59,10 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
 
     try {
       await _corporalService.addMeasurement({
-        'weight': parseMeasurement(_weightController.text),
-        'height': parseMeasurement(_heightController.text),
-        'fat_percentage': parseMeasurement(_fatController.text),
-        'muscle_mass': parseMeasurement(_muscleController.text),
+        'weight': _parseMeasurement(_weightController.text),
+        'height': _parseMeasurement(_heightController.text),
+        'fat_percentage': _parseMeasurement(_fatController.text),
+        'muscle_mass': _parseMeasurement(_muscleController.text),
       });
 
       if (mounted) {
@@ -102,6 +102,30 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
     }
   }
 
+  Future<void> _confirmDeleteMeasurement(String id) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Borrar Medición'),
+        content: const Text('¿Estás seguro de que deseas borrar este registro?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              'Borrar',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) _deleteMeasurement(id);
+  }
+
   Future<void> _showEditDialog(String id, Map<String, dynamic> data) async {
     final weightEditController = TextEditingController(
       text: data['weight']?.toString(),
@@ -136,7 +160,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
                   validator: (value) =>
                       (value == null || value.isEmpty) ? 'Requerido' : null,
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: heightEditController,
                   decoration: const InputDecoration(labelText: 'Altura (cm)'),
@@ -144,7 +168,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
                     decimal: true,
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: fatEditController,
                   decoration: const InputDecoration(labelText: '% Grasa'),
@@ -152,7 +176,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
                     decimal: true,
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: muscleEditController,
                   decoration: const InputDecoration(labelText: 'Músculo (kg)'),
@@ -175,10 +199,10 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
 
               try {
                 await _corporalService.updateMeasurement(id, {
-                  'weight': parseMeasurement(weightEditController.text),
-                  'height': parseMeasurement(heightEditController.text),
-                  'fat_percentage': parseMeasurement(fatEditController.text),
-                  'muscle_mass': parseMeasurement(muscleEditController.text),
+                  'weight': _parseMeasurement(weightEditController.text),
+                  'height': _parseMeasurement(heightEditController.text),
+                  'fat_percentage': _parseMeasurement(fatEditController.text),
+                  'muscle_mass': _parseMeasurement(muscleEditController.text),
                 });
                 if (context.mounted) Navigator.pop(context);
               } catch (e) {
@@ -401,46 +425,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
                                                 Icons.delete,
                                                 size: 20,
                                               ),
-                                              onPressed: () {
-                                                showDialog(
-                                                  context: context,
-                                                  builder: (context) => AlertDialog(
-                                                    title: const Text(
-                                                      'Borrar Medición',
-                                                    ),
-                                                    content: const Text(
-                                                      '¿Estás seguro de que deseas borrar este registro?',
-                                                    ),
-                                                    actions: [
-                                                      TextButton(
-                                                        onPressed: () =>
-                                                            Navigator.pop(
-                                                              context,
-                                                            ),
-                                                        child: const Text(
-                                                          'Cancelar',
-                                                        ),
-                                                      ),
-                                                      TextButton(
-                                                        onPressed: () {
-                                                          _deleteMeasurement(
-                                                            docs[index].id,
-                                                          );
-                                                          Navigator.pop(
-                                                            context,
-                                                          );
-                                                        },
-                                                        child: const Text(
-                                                          'Borrar',
-                                                          style: TextStyle(
-                                                            color: Colors.red,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                              },
+                                              onPressed: () => _confirmDeleteMeasurement(docs[index].id),
                                               padding: EdgeInsets.zero,
                                               constraints:
                                                   const BoxConstraints(),

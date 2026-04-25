@@ -24,10 +24,11 @@ GoRouter createRouter(AuthStateNotifier authState) {
     initialLocation: '/',
     redirect: (context, state) {
       final loggedIn = authState.isLoggedIn;
-      final loggingIn = state.uri.toString() == '/login';
+      final path = state.uri.toString();
+      final onAuthPage = path == '/login' || path == '/register';
 
-      if (!loggedIn && !loggingIn) return '/login';
-      if (loggedIn && loggingIn) return '/';
+      if (!loggedIn && !onAuthPage) return '/login';
+      if (loggedIn && onAuthPage) return '/';
       return null;
     },
     routes: [

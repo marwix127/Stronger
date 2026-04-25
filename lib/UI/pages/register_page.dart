@@ -10,52 +10,51 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _nameController = TextEditingController();
 
-  final authService = AuthService();
+  final _authService = AuthService();
 
-  bool loading = false;
+  bool _loading = false;
 
   Future<void> _register() async {
-    final email = emailController.text.trim();
-    final password = passwordController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
 
-    setState(() => loading = true);
+    setState(() => _loading = true);
 
     try {
-      final user = await authService.register(email, password);
+      final user = await _authService.register(email, password);
 
       if (user != null && mounted) {
         context.go('/');
       }
     } catch (e) {
       if (mounted) {
-        // Verifica si el widget sigue montado
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al resgistrarse: ${e.toString()}')),
+          SnackBar(content: Text('Error al registrarse: ${e.toString()}')),
         );
       }
     } finally {
       if (mounted) {
-        // Asegúrate de que el widget sigue montado antes de llamar a setState
-        setState(() => loading = false);
+        setState(() => _loading = false);
       }
     }
   }
 
   @override
   void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Iniciar Sesión")),
+      appBar: AppBar(title: const Text("Regístrate")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Center(
@@ -68,7 +67,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 16),
               TextField(
-                controller: nameController,
+                controller: _nameController,
                 decoration: const InputDecoration(
                   labelText: "Nombre",
                   border: OutlineInputBorder(),
@@ -76,7 +75,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 24),
               TextField(
-                controller: emailController,
+                controller: _emailController,
                 decoration: const InputDecoration(
                   labelText: "Email",
                   border: OutlineInputBorder(),
@@ -84,7 +83,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 16),
               TextField(
-                controller: passwordController,
+                controller: _passwordController,
                 obscureText: true,
                 decoration: const InputDecoration(
                   labelText: "Contraseña",
@@ -92,7 +91,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
               const SizedBox(height: 24),
-              loading
+              _loading
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
                       onPressed: _register,

@@ -90,7 +90,7 @@ class _ChatPageState extends State<IAChatPage> {
     });
   }
 
-  void _sendMessage() async {
+  Future<void> _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
     _controller.clear();

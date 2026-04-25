@@ -11,10 +11,13 @@ class ExercisesCategories extends StatefulWidget {
 }
 
 class _ExercisesCategoriesState extends State<ExercisesCategories> {
-  final ejercicioService = EjercicioService();
+  final _ejercicioService = EjercicioService();
+  late final Future<List<String>> _categoriasFuture;
 
-  Future<List<String>> obtenerCategorias() {
-    return ejercicioService.obtenerCategoriasUnicas();
+  @override
+  void initState() {
+    super.initState();
+    _categoriasFuture = _ejercicioService.obtenerCategoriasUnicas();
   }
 
   @override
@@ -25,14 +28,12 @@ class _ExercisesCategoriesState extends State<ExercisesCategories> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () {
-              context.push('/add-exercise');
-            },
+            onPressed: () => context.push('/add-exercise'),
           ),
         ],
       ),
       body: FutureBuilder<List<String>>(
-        future: obtenerCategorias(),
+        future: _categoriasFuture,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -46,16 +47,16 @@ class _ExercisesCategoriesState extends State<ExercisesCategories> {
                 title: Text(categoria),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () async {
-                  final ejercicio = await Navigator.push(
-                    context,
+                  final nav = Navigator.of(context);
+                  final ejercicio = await nav.push(
                     MaterialPageRoute(
                       builder: (_) =>
                           ExercisesByCategories(categoria: categoria),
                     ),
                   );
-                  if (!mounted) return; // <-- Esto previene el error
+                  if (!mounted) return;
                   if (ejercicio != null) {
-                    Navigator.pop(context, ejercicio);
+                    nav.pop(ejercicio);
                   }
                 },
               );

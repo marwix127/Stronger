@@ -64,28 +64,28 @@ class GraficsPage extends StatefulWidget {
 }
 
 class _GraficsPageState extends State<GraficsPage> {
-  List<Training> trainings = [];
-  String? selectedExercise;
-  String chartType = 'Volumen';
-  bool loading = true;
+  final _trainingService = TrainingService();
+  List<Training> _trainings = [];
+  String? _selectedExercise;
+  String _chartType = 'Volumen';
+  bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    loadTrainings();
+    _loadTrainings();
   }
 
-  Future<void> loadTrainings() async {
-    final loaded = await TrainingService()
-        .getTrainings(); // 👈 este método ya lo tienes
+  Future<void> _loadTrainings() async {
+    final loaded = await _trainingService.getTrainings();
     setState(() {
-      trainings = loaded;
-      loading = false;
+      _trainings = loaded;
+      _loading = false;
     });
   }
 
-  List<String> getAllExercises() {
-    final all = trainings
+  List<String> _getAllExercises() {
+    final all = _trainings
         .expand((t) => t.exercises)
         .map((e) => e.name)
         .toSet()
@@ -96,15 +96,15 @@ class _GraficsPageState extends State<GraficsPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (loading) {
+    if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final chartData = selectedExercise == null
-        ? []
-        : chartType == 'Volumen'
-        ? calcularVolumenPorEjercicio(trainings, selectedExercise!)
-        : calcularPesoMedioPorEjercicio(trainings, selectedExercise!);
+    final chartData = _selectedExercise == null
+        ? <Map<String, dynamic>>[]
+        : _chartType == 'Volumen'
+        ? calcularVolumenPorEjercicio(_trainings, _selectedExercise!)
+        : calcularPesoMedioPorEjercicio(_trainings, _selectedExercise!);
 
     return Scaffold(
       appBar: AppBar(title: const Text("Volumen de Entrenamiento")),
@@ -114,13 +114,13 @@ class _GraficsPageState extends State<GraficsPage> {
           children: [
             DropdownButton<String>(
               hint: const Text("Selecciona un ejercicio"),
-              value: selectedExercise,
+              value: _selectedExercise,
               isExpanded: true,
-              items: getAllExercises()
+              items: _getAllExercises()
                   .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                   .toList(),
               onChanged: (value) {
-                setState(() => selectedExercise = value);
+                setState(() => _selectedExercise = value);
               },
             ),
             const SizedBox(height: 20),
@@ -129,10 +129,10 @@ class _GraficsPageState extends State<GraficsPage> {
                 ButtonSegment(value: 'Volumen', label: Text('Volumen')),
                 ButtonSegment(value: 'Peso Medio', label: Text('Peso Medio')),
               ],
-              selected: {chartType},
+              selected: {_chartType},
               onSelectionChanged: (Set<String> newSelection) {
                 setState(() {
-                  chartType = newSelection.first;
+                  _chartType = newSelection.first;
                 });
               },
             ),
@@ -141,11 +141,9 @@ class _GraficsPageState extends State<GraficsPage> {
               const Text("No hay datos para este ejercicio")
             else
               Expanded(
-                child: chartType == 'Volumen'
-                    ? VolumenChart(data: chartData.cast<Map<String, dynamic>>())
-                    : AverageWeightChart(
-                        data: chartData.cast<Map<String, dynamic>>(),
-                      ),
+                child: _chartType == 'Volumen'
+                    ? VolumenChart(data: chartData)
+                    : AverageWeightChart(data: chartData),
               ),
           ],
         ),

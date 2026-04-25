@@ -2,6 +2,7 @@ import 'package:business_ia/models/training.dart';
 import 'package:business_ia/infrastructure/services/firebase/training_service.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TrainingHistoryPage extends StatefulWidget {
@@ -104,7 +105,7 @@ class _TrainingHistoryPageState extends State<TrainingHistoryPage> {
                 child: ListTile(
                   title: Text(training.name),
                   subtitle: Text(
-                    "Fecha: ${training.date.toLocal().toString().split(' ')[0]}",
+                    "Fecha: ${DateFormat('dd/MM/yyyy').format(training.date.toLocal())}",
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () async {

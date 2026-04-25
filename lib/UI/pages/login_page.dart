@@ -10,44 +10,42 @@ class LogInPage extends StatefulWidget {
 }
 
 class _LogInPageState extends State<LogInPage> {
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
-  final authService = AuthService();
+  final _authService = AuthService();
 
-  bool loading = false;
+  bool _loading = false;
 
   Future<void> _login() async {
-    final email = emailController.text.trim();
-    final password = passwordController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
 
-    setState(() => loading = true);
+    setState(() => _loading = true);
 
     try {
-      final user = await authService.logIn(email, password);
+      final user = await _authService.logIn(email, password);
 
       if (user != null && mounted) {
         context.go('/');
       }
     } catch (e) {
       if (mounted) {
-        // Verifica si el widget sigue montado
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al iniciar sesión: ${e.toString()}')),
         );
       }
     } finally {
       if (mounted) {
-        // Asegúrate de que el widget sigue montado antes de llamar a setState
-        setState(() => loading = false);
+        setState(() => _loading = false);
       }
     }
   }
 
   @override
   void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -67,7 +65,7 @@ class _LogInPageState extends State<LogInPage> {
               ),
               const SizedBox(height: 24),
               TextField(
-                controller: emailController,
+                controller: _emailController,
                 decoration: const InputDecoration(
                   labelText: "Usuario",
                   border: OutlineInputBorder(),
@@ -75,7 +73,7 @@ class _LogInPageState extends State<LogInPage> {
               ),
               const SizedBox(height: 16),
               TextField(
-                controller: passwordController,
+                controller: _passwordController,
                 obscureText: true,
                 decoration: const InputDecoration(
                   labelText: "Contraseña",
@@ -83,7 +81,7 @@ class _LogInPageState extends State<LogInPage> {
                 ),
               ),
               const SizedBox(height: 24),
-              loading
+              _loading
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
                       onPressed: _login,

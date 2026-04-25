@@ -135,12 +135,9 @@ class _TrainingPageState extends State<TrainingPage>
         setState(() {
           _exerciseHints[exerciseId] = lastSeries;
         });
-      } else {
-        // Optional: Log that no history was found
-        print('No history found for exercise $exerciseId');
       }
-    } catch (e) {
-      print('Error loading hints for $exerciseId: $e');
+    } catch (_) {
+      // hints are optional — silently ignore failures
     }
   }
 

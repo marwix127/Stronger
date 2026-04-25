@@ -12,34 +12,43 @@ class TrainingService {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return null;
 
-    // Get last 50 trainings to find the most recent one with this exercise
-    final snap = await _db
-        .collection('users')
-        .doc(uid)
-        .collection('trainings')
-        .orderBy('date', descending: true)
-        .limit(50)
-        .get();
+    const batchSize = 20;
+    DocumentSnapshot? lastDoc;
 
-    for (var doc in snap.docs) {
-      final data = doc.data();
-      final exercisesList = data['exercises'] as List<dynamic>?;
+    while (true) {
+      var query = _db
+          .collection('users')
+          .doc(uid)
+          .collection('trainings')
+          .orderBy('date', descending: true)
+          .limit(batchSize);
 
-      if (exercisesList != null) {
-        // Check if this training contains the exercise
-        final exerciseData = exercisesList.firstWhere(
-          (e) => e['exerciseId'] == exerciseId,
-          orElse: () => null,
-        );
+      if (lastDoc != null) query = query.startAfterDocument(lastDoc);
 
-        if (exerciseData != null) {
-          final seriesList = exerciseData['series'] as List<dynamic>?;
-          if (seriesList != null) {
-            return seriesList.map((s) => Series.fromMap(s)).toList();
+      final snap = await query.get();
+      if (snap.docs.isEmpty) break;
+
+      for (var doc in snap.docs) {
+        final data = doc.data();
+        final exercisesList = data['exercises'] as List<dynamic>?;
+        if (exercisesList != null) {
+          final exerciseData = exercisesList.firstWhere(
+            (e) => e['exerciseId'] == exerciseId,
+            orElse: () => null,
+          );
+          if (exerciseData != null) {
+            final seriesList = exerciseData['series'] as List<dynamic>?;
+            if (seriesList != null) {
+              return seriesList.map((s) => Series.fromMap(s)).toList();
+            }
           }
         }
       }
+
+      if (snap.docs.length < batchSize) break;
+      lastDoc = snap.docs.last;
     }
+
     return null;
   }
 

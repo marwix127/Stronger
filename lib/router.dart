@@ -1,7 +1,7 @@
-import 'package:business_ia/UI/pages/add_exercise_page.dart';
-import 'package:business_ia/UI/pages/exercise_management_categories.dart';
-import 'package:business_ia/UI/widgets/main_scaffold.dart';
-import 'package:business_ia/models/training.dart';
+﻿import 'package:stronger/UI/pages/add_exercise_page.dart';
+import 'package:stronger/UI/pages/exercise_management_categories.dart';
+import 'package:stronger/UI/widgets/main_scaffold.dart';
+import 'package:stronger/models/training.dart';
 import 'package:go_router/go_router.dart';
 
 import 'UI/pages/trainings_history_page.dart';

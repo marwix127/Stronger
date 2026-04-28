@@ -1,9 +1,9 @@
-import 'package:business_ia/infrastructure/services/firebase/training_service.dart';
-import 'package:business_ia/models/selected_exercise.dart';
-import 'package:business_ia/models/training.dart';
+﻿import 'package:stronger/infrastructure/services/firebase/training_service.dart';
+import 'package:stronger/models/selected_exercise.dart';
+import 'package:stronger/models/training.dart';
 import 'package:flutter/material.dart';
-import 'package:business_ia/UI/widgets/volume_chart.dart';
-import 'package:business_ia/UI/widgets/average_weight.dart';
+import 'package:stronger/UI/widgets/volume_chart.dart';
+import 'package:stronger/UI/widgets/average_weight.dart';
 
 List<Map<String, dynamic>> calcularVolumenPorEjercicio(
   List<Training> trainings,

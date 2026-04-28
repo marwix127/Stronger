@@ -1,6 +1,6 @@
-import 'package:business_ia/models/selected_exercise.dart';
-import 'package:business_ia/models/serie.dart';
-import 'package:business_ia/UI/widgets/series_row.dart';
+﻿import 'package:stronger/models/selected_exercise.dart';
+import 'package:stronger/models/serie.dart';
+import 'package:stronger/UI/widgets/series_row.dart';
 import 'package:flutter/material.dart';
 
 /// Widget para mostrar una tarjeta de ejercicio con sus series.

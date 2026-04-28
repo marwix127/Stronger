@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:business_ia/models/selected_exercise.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:stronger/models/selected_exercise.dart';
 
 class Training {
   final String id; // Added to uniquely identify the training

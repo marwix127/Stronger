@@ -1,4 +1,4 @@
-package com.example.business_ia
+package com.example.stronger
 
 import io.flutter.embedding.android.FlutterActivity
 

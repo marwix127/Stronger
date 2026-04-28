@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'router.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -6,8 +6,8 @@ import 'firebase_options.dart';
 import 'infrastructure/services/firebase/auth_state_notifier.dart';
 import 'infrastructure/services/firebase/exercises_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:business_ia/infrastructure/services/theme_notifier.dart';
-import 'package:business_ia/theme/theme.dart';
+import 'package:stronger/infrastructure/services/theme_notifier.dart';
+import 'package:stronger/theme/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

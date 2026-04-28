@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:business_ia/infrastructure/services/firebase/auth_service.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:stronger/infrastructure/services/firebase/auth_service.dart';
 
 class CorporalService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

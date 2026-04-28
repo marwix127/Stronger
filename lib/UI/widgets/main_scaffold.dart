@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:business_ia/infrastructure/services/firebase/auth_service.dart';
-import 'package:business_ia/infrastructure/services/theme_notifier.dart';
+import 'package:stronger/infrastructure/services/firebase/auth_service.dart';
+import 'package:stronger/infrastructure/services/theme_notifier.dart';
 
 class MainScaffold extends StatelessWidget {
   final Widget child;

@@ -1,4 +1,4 @@
-import 'package:business_ia/models/serie.dart';
+﻿import 'package:stronger/models/serie.dart';
 
 class SelectedExercise {
   final String id;

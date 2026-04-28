@@ -1,4 +1,4 @@
-import 'package:business_ia/models/measurement.dart';
+﻿import 'package:stronger/models/measurement.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

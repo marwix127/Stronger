@@ -1,4 +1,4 @@
-import 'package:business_ia/models/serie.dart';
+﻿import 'package:stronger/models/serie.dart';
 import 'package:flutter/material.dart';
 
 /// Widget para mostrar una fila de serie con peso y repeticiones.

@@ -1,6 +1,6 @@
-import 'package:business_ia/UI/widgets/body_composition_chart.dart';
-import 'package:business_ia/infrastructure/services/firebase/corporal_service.dart';
-import 'package:business_ia/models/measurement.dart';
+﻿import 'package:stronger/UI/widgets/body_composition_chart.dart';
+import 'package:stronger/infrastructure/services/firebase/corporal_service.dart';
+import 'package:stronger/models/measurement.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

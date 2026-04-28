@@ -1,10 +1,10 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
-import 'package:business_ia/infrastructure/services/firebase/training_service.dart';
-import 'package:business_ia/models/selected_exercise.dart';
-import 'package:business_ia/models/serie.dart';
-import 'package:business_ia/models/training.dart';
-import 'package:business_ia/UI/widgets/exercise_card.dart';
+import 'package:stronger/infrastructure/services/firebase/training_service.dart';
+import 'package:stronger/models/selected_exercise.dart';
+import 'package:stronger/models/serie.dart';
+import 'package:stronger/models/training.dart';
+import 'package:stronger/UI/widgets/exercise_card.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';

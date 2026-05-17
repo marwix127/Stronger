@@ -1,9 +1,8 @@
-﻿import 'package:stronger/infrastructure/services/firebase/exercises_service.dart';
+import 'package:stronger/infrastructure/services/firebase/exercises_service.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'exercise_management_by_category.dart';
 
-/// Página que muestra categorías para gestionar ejercicios (editar/eliminar).
 class ExerciseManagementCategories extends StatefulWidget {
   const ExerciseManagementCategories({super.key});
 
@@ -14,8 +13,8 @@ class ExerciseManagementCategories extends StatefulWidget {
 
 class _ExerciseManagementCategoriesState
     extends State<ExerciseManagementCategories> {
-  final _ejercicioService = EjercicioService();
-  late Future<List<String>> _futureCategorias;
+  final _exerciseService = ExerciseService();
+  late Future<List<String>> _futureCategories;
 
   @override
   void initState() {
@@ -25,14 +24,14 @@ class _ExerciseManagementCategoriesState
 
   void _refreshList() {
     setState(() {
-      _futureCategorias = _ejercicioService.obtenerCategoriasUnicas();
+      _futureCategories = _exerciseService.getUniqueCategories();
     });
   }
 
-  Future<void> _editarCategoria(String categoria) async {
-    final controller = TextEditingController(text: categoria);
+  Future<void> _editCategory(String category) async {
+    final controller = TextEditingController(text: category);
 
-    final nuevoNombre = await showDialog<String>(
+    final newName = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Renombrar categoría'),
@@ -57,21 +56,19 @@ class _ExerciseManagementCategoriesState
       ),
     );
 
-    if (nuevoNombre != null &&
-        nuevoNombre.isNotEmpty &&
-        nuevoNombre != categoria) {
-      await _ejercicioService.renombrarCategoria(categoria, nuevoNombre);
+    if (newName != null && newName.isNotEmpty && newName != category) {
+      await _exerciseService.renameCategory(category, newName);
       _refreshList();
     }
   }
 
-  Future<void> _eliminarCategoria(String categoria) async {
+  Future<void> _deleteCategory(String category) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Eliminar categoría'),
         content: Text(
-          '¿Seguro que quieres eliminar la categoría "$categoria"?\n\n'
+          '¿Seguro que quieres eliminar la categoría "$category"?\n\n'
           'Se eliminarán TODOS los ejercicios de esta categoría.',
         ),
         actions: [
@@ -91,7 +88,7 @@ class _ExerciseManagementCategoriesState
     );
 
     if (confirm == true) {
-      await _ejercicioService.eliminarCategoria(categoria);
+      await _exerciseService.deleteCategory(category);
       _refreshList();
     }
   }
@@ -114,33 +111,33 @@ class _ExerciseManagementCategoriesState
         ],
       ),
       body: FutureBuilder<List<String>>(
-        future: _futureCategorias,
+        future: _futureCategories,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
-          final categorias = snapshot.data!;
+          final categories = snapshot.data!;
 
-          if (categorias.isEmpty) {
+          if (categories.isEmpty) {
             return const Center(child: Text('No hay categorías'));
           }
 
           return ListView.builder(
-            itemCount: categorias.length,
+            itemCount: categories.length,
             itemBuilder: (context, index) {
-              final categoria = categorias[index];
+              final category = categories[index];
               return ListTile(
-                title: Text(categoria),
+                title: Text(category),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
                       icon: const Icon(Icons.edit),
-                      onPressed: () => _editarCategoria(categoria),
+                      onPressed: () => _editCategory(category),
                     ),
                     IconButton(
                       icon: Icon(Icons.delete, color: colorScheme.error),
-                      onPressed: () => _eliminarCategoria(categoria),
+                      onPressed: () => _deleteCategory(category),
                     ),
                     const Icon(Icons.chevron_right),
                   ],
@@ -150,7 +147,7 @@ class _ExerciseManagementCategoriesState
                     context,
                     MaterialPageRoute(
                       builder: (_) =>
-                          ExerciseManagementByCategory(categoria: categoria),
+                          ExerciseManagementByCategory(category: category),
                     ),
                   );
                   _refreshList();

@@ -13,7 +13,7 @@ class BodyCompositionChart extends StatefulWidget {
 }
 
 class _BodyCompositionChartState extends State<BodyCompositionChart> {
-  String _selectedMetric = 'Peso';
+  String _selectedMetric = 'Weight';
 
   @override
   Widget build(BuildContext context) {
@@ -37,13 +37,13 @@ class _BodyCompositionChartState extends State<BodyCompositionChart> {
       final m = sortedMeasurements[i];
       double value = 0.0;
       switch (_selectedMetric) {
-        case 'Peso':
+        case 'Weight':
           value = m.weight;
           break;
-        case 'Grasa':
+        case 'Fat':
           value = m.fat;
           break;
-        case 'Músculo':
+        case 'Muscle':
           value = m.muscle;
           break;
       }
@@ -94,26 +94,26 @@ class _BodyCompositionChartState extends State<BodyCompositionChart> {
           children: [
             ChoiceChip(
               label: const Text('Peso (kg)'),
-              selected: _selectedMetric == 'Peso',
+              selected: _selectedMetric == 'Weight',
               selectedColor: Colors.blue.withOpacity(0.2),
               onSelected: (selected) {
-                if (selected) setState(() => _selectedMetric = 'Peso');
+                if (selected) setState(() => _selectedMetric = 'Weight');
               },
             ),
             ChoiceChip(
               label: const Text('Grasa (%)'),
-              selected: _selectedMetric == 'Grasa',
+              selected: _selectedMetric == 'Fat',
               selectedColor: Colors.red.withOpacity(0.2),
               onSelected: (selected) {
-                if (selected) setState(() => _selectedMetric = 'Grasa');
+                if (selected) setState(() => _selectedMetric = 'Fat');
               },
             ),
             ChoiceChip(
               label: const Text('Músculo (kg)'),
-              selected: _selectedMetric == 'Músculo',
+              selected: _selectedMetric == 'Muscle',
               selectedColor: Colors.green.withOpacity(0.2),
               onSelected: (selected) {
-                if (selected) setState(() => _selectedMetric = 'Músculo');
+                if (selected) setState(() => _selectedMetric = 'Muscle');
               },
             ),
           ],

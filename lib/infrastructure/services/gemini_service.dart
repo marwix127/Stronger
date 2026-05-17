@@ -62,7 +62,7 @@ Usa esta información para dar respuestas personalizadas y precisas sobre su pro
         .limit(maxTrainings)
         .get();
 
-    final entrenos = snapshot.docs.map((d) {
+    final trainings = snapshot.docs.map((d) {
       final data = Map<String, dynamic>.from(d.data());
       return {
         'id': d.id,
@@ -92,14 +92,14 @@ Usa esta información para dar respuestas personalizadas y precisas sobre su pro
       };
     }).toList();
 
-    return _formatTrainingHistory(entrenos);
+    return _formatTrainingHistory(trainings);
   }
 
-  String _formatTrainingHistory(List<Map<String, dynamic>> entrenos) {
-    if (entrenos.isEmpty) return 'No hay entrenamientos registrados.';
+  String _formatTrainingHistory(List<Map<String, dynamic>> trainings) {
+    if (trainings.isEmpty) return 'No hay entrenamientos registrados.';
     final buffer = StringBuffer();
 
-    for (final t in entrenos) {
+    for (final t in trainings) {
       final date = t['date'] as DateTime?;
       final dateStr = date != null
           ? "${date.day}/${date.month}/${date.year}"

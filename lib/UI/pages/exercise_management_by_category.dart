@@ -1,11 +1,10 @@
-﻿import 'package:stronger/infrastructure/services/firebase/exercises_service.dart';
+import 'package:stronger/infrastructure/services/firebase/exercises_service.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-/// Página para gestionar (editar/eliminar) ejercicios de una categoría específica.
 class ExerciseManagementByCategory extends StatefulWidget {
-  final String categoria;
-  const ExerciseManagementByCategory({required this.categoria, super.key});
+  final String category;
+  const ExerciseManagementByCategory({required this.category, super.key});
 
   @override
   State<ExerciseManagementByCategory> createState() =>
@@ -14,8 +13,8 @@ class ExerciseManagementByCategory extends StatefulWidget {
 
 class _ExerciseManagementByCategoryState
     extends State<ExerciseManagementByCategory> {
-  final _ejercicioService = EjercicioService();
-  late Future<List<Map<String, dynamic>>> _futureEjercicios;
+  final _exerciseService = ExerciseService();
+  late Future<List<Map<String, dynamic>>> _futureExercises;
 
   @override
   void initState() {
@@ -25,13 +24,11 @@ class _ExerciseManagementByCategoryState
 
   void _refreshList() {
     setState(() {
-      _futureEjercicios = _ejercicioService.obtenerPorCategoria(
-        widget.categoria,
-      );
+      _futureExercises = _exerciseService.getByCategory(widget.category);
     });
   }
 
-  Future<void> _confirmarEliminar(Map<String, dynamic> ejercicio) async {
+  Future<void> _confirmDelete(Map<String, dynamic> exercise) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -53,7 +50,7 @@ class _ExerciseManagementByCategoryState
     );
 
     if (confirm == true) {
-      await _ejercicioService.eliminarEjercicio(ejercicio['id']);
+      await _exerciseService.deleteExercise(exercise['id']);
       _refreshList();
     }
   }
@@ -64,7 +61,7 @@ class _ExerciseManagementByCategoryState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.categoria),
+        title: Text(widget.category),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -76,36 +73,36 @@ class _ExerciseManagementByCategoryState
         ],
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _futureEjercicios,
+        future: _futureExercises,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
-          final ejercicios = snapshot.data!;
+          final exercises = snapshot.data!;
 
-          if (ejercicios.isEmpty) {
+          if (exercises.isEmpty) {
             return const Center(
               child: Text('No hay ejercicios en esta categoría'),
             );
           }
 
           return ListView.builder(
-            itemCount: ejercicios.length,
+            itemCount: exercises.length,
             itemBuilder: (context, index) {
-              final ejercicio = ejercicios[index];
+              final exercise = exercises[index];
               return ListTile(
                 leading: const Icon(Icons.fitness_center),
-                title: Text(ejercicio['nombre']),
+                title: Text(exercise['nombre']),
                 subtitle: Text(
-                  ejercicio['descripcion'] ?? '',
+                  exercise['descripcion'] ?? '',
                   style: const TextStyle(color: Colors.grey),
                 ),
                 trailing: IconButton(
                   icon: Icon(Icons.delete, color: colorScheme.error),
-                  onPressed: () => _confirmarEliminar(ejercicio),
+                  onPressed: () => _confirmDelete(exercise),
                 ),
                 onTap: () async {
-                  await context.push('/add-exercise', extra: ejercicio);
+                  await context.push('/add-exercise', extra: exercise);
                   _refreshList();
                 },
               );

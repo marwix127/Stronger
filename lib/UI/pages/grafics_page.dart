@@ -1,54 +1,54 @@
-﻿import 'package:stronger/infrastructure/services/firebase/training_service.dart';
+import 'package:stronger/infrastructure/services/firebase/training_service.dart';
 import 'package:stronger/models/selected_exercise.dart';
 import 'package:stronger/models/training.dart';
 import 'package:flutter/material.dart';
 import 'package:stronger/UI/widgets/volume_chart.dart';
 import 'package:stronger/UI/widgets/average_weight.dart';
 
-List<Map<String, dynamic>> calcularVolumenPorEjercicio(
+List<Map<String, dynamic>> calculateVolumePerExercise(
   List<Training> trainings,
-  String nombreEjercicio,
+  String exerciseName,
 ) {
   return trainings
       .map((training) {
-        final ejercicio = training.exercises.firstWhere(
-          (e) => e.name.toLowerCase() == nombreEjercicio.toLowerCase(),
+        final exercise = training.exercises.firstWhere(
+          (e) => e.name.toLowerCase() == exerciseName.toLowerCase(),
           orElse: () =>
               SelectedExercise(id: '', name: '', category: '', series: []),
         );
 
-        final volumen = ejercicio.series.fold<double>(
+        final volume = exercise.series.fold<double>(
           0,
           (total, serie) => total + (serie.weight * serie.repetitions),
         );
 
-        return {'date': training.date, 'volumen': volumen};
+        return {'date': training.date, 'volume': volume};
       })
-      .where((e) => (e['volumen'] as num) > 0)
+      .where((e) => (e['volume'] as num) > 0)
       .toList();
 }
 
-List<Map<String, dynamic>> calcularPesoMedioPorEjercicio(
+List<Map<String, dynamic>> calculateAverageWeightPerExercise(
   List<Training> trainings,
-  String nombreEjercicio,
+  String exerciseName,
 ) {
   return trainings
       .map((training) {
-        final ejercicio = training.exercises.firstWhere(
-          (e) => e.name.toLowerCase() == nombreEjercicio.toLowerCase(),
+        final exercise = training.exercises.firstWhere(
+          (e) => e.name.toLowerCase() == exerciseName.toLowerCase(),
           orElse: () =>
               SelectedExercise(id: '', name: '', category: '', series: []),
         );
 
-        if (ejercicio.series.isEmpty) {
+        if (exercise.series.isEmpty) {
           return {'date': training.date, 'average_weight': 0.0};
         }
 
-        final totalWeight = ejercicio.series.fold<double>(
+        final totalWeight = exercise.series.fold<double>(
           0,
           (total, serie) => total + serie.weight,
         );
-        final average = totalWeight / ejercicio.series.length;
+        final average = totalWeight / exercise.series.length;
 
         return {'date': training.date, 'average_weight': average};
       })
@@ -67,7 +67,7 @@ class _GraficsPageState extends State<GraficsPage> {
   final _trainingService = TrainingService();
   List<Training> _trainings = [];
   String? _selectedExercise;
-  String _chartType = 'Volumen';
+  String _chartType = 'Volume';
   bool _loading = true;
 
   @override
@@ -102,9 +102,9 @@ class _GraficsPageState extends State<GraficsPage> {
 
     final chartData = _selectedExercise == null
         ? <Map<String, dynamic>>[]
-        : _chartType == 'Volumen'
-        ? calcularVolumenPorEjercicio(_trainings, _selectedExercise!)
-        : calcularPesoMedioPorEjercicio(_trainings, _selectedExercise!);
+        : _chartType == 'Volume'
+        ? calculateVolumePerExercise(_trainings, _selectedExercise!)
+        : calculateAverageWeightPerExercise(_trainings, _selectedExercise!);
 
     return Scaffold(
       appBar: AppBar(title: const Text("Volumen de Entrenamiento")),
@@ -126,8 +126,9 @@ class _GraficsPageState extends State<GraficsPage> {
             const SizedBox(height: 20),
             SegmentedButton<String>(
               segments: const [
-                ButtonSegment(value: 'Volumen', label: Text('Volumen')),
-                ButtonSegment(value: 'Peso Medio', label: Text('Peso Medio')),
+                ButtonSegment(value: 'Volume', label: Text('Volumen')),
+                ButtonSegment(
+                    value: 'Average Weight', label: Text('Peso Medio')),
               ],
               selected: {_chartType},
               onSelectionChanged: (Set<String> newSelection) {
@@ -141,7 +142,7 @@ class _GraficsPageState extends State<GraficsPage> {
               const Text("No hay datos para este ejercicio")
             else
               Expanded(
-                child: _chartType == 'Volumen'
+                child: _chartType == 'Volume'
                     ? VolumenChart(data: chartData)
                     : AverageWeightChart(data: chartData),
               ),

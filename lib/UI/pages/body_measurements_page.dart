@@ -18,7 +18,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
   final _heightController = TextEditingController();
   final _fatController = TextEditingController();
   final _muscleController = TextEditingController();
-  final CorporalService _corporalService = CorporalService();
+  final BodyMeasurementService _measurementService = BodyMeasurementService();
   bool _isLoading = false;
 
   @override
@@ -28,7 +28,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
   }
 
   Future<void> _loadLastHeight() async {
-    final lastMeasurement = await _corporalService.getLastMeasurement();
+    final lastMeasurement = await _measurementService.getLastMeasurement();
     if (lastMeasurement != null && lastMeasurement['height'] != null) {
       if (mounted) {
         setState(() {
@@ -58,7 +58,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
     setState(() => _isLoading = true);
 
     try {
-      await _corporalService.addMeasurement({
+      await _measurementService.addMeasurement({
         'weight': _parseMeasurement(_weightController.text),
         'height': _parseMeasurement(_heightController.text),
         'fat_percentage': _parseMeasurement(_fatController.text),
@@ -87,7 +87,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
 
   Future<void> _deleteMeasurement(String id) async {
     try {
-      await _corporalService.deleteMeasurement(id);
+      await _measurementService.deleteMeasurement(id);
       if (mounted) {
         ScaffoldMessenger.of(
           context,
@@ -198,7 +198,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
               if (!editFormKey.currentState!.validate()) return;
 
               try {
-                await _corporalService.updateMeasurement(id, {
+                await _measurementService.updateMeasurement(id, {
                   'weight': _parseMeasurement(weightEditController.text),
                   'height': _parseMeasurement(heightEditController.text),
                   'fat_percentage': _parseMeasurement(fatEditController.text),
@@ -340,7 +340,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
                 ),
                 const SizedBox(height: 8),
                 StreamBuilder<QuerySnapshot>(
-                  stream: _corporalService.getMeasurements(),
+                  stream: _measurementService.getMeasurements(),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
                       return const Center(child: Text('Error al cargar datos'));

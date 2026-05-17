@@ -52,8 +52,8 @@ GoRouter createRouter(AuthStateNotifier authState) {
       GoRoute(
         path: '/exercises-by-category',
         builder: (context, state) {
-          final categoria = state.uri.queryParameters['categoria'] ?? '';
-          return ExercisesByCategories(categoria: categoria);
+          final category = state.uri.queryParameters['category'] ?? '';
+          return ExercisesByCategories(category: category);
         },
       ),
       GoRoute(

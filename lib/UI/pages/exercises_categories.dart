@@ -1,4 +1,4 @@
-﻿import 'package:stronger/infrastructure/services/firebase/exercises_service.dart';
+import 'package:stronger/infrastructure/services/firebase/exercises_service.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'exercises_by_categories.dart';
@@ -11,13 +11,13 @@ class ExercisesCategories extends StatefulWidget {
 }
 
 class _ExercisesCategoriesState extends State<ExercisesCategories> {
-  final _ejercicioService = EjercicioService();
-  late final Future<List<String>> _categoriasFuture;
+  final _exerciseService = ExerciseService();
+  late final Future<List<String>> _categoriesFuture;
 
   @override
   void initState() {
     super.initState();
-    _categoriasFuture = _ejercicioService.obtenerCategoriasUnicas();
+    _categoriesFuture = _exerciseService.getUniqueCategories();
   }
 
   @override
@@ -33,30 +33,30 @@ class _ExercisesCategoriesState extends State<ExercisesCategories> {
         ],
       ),
       body: FutureBuilder<List<String>>(
-        future: _categoriasFuture,
+        future: _categoriesFuture,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
-          final categorias = snapshot.data!;
+          final categories = snapshot.data!;
           return ListView.builder(
-            itemCount: categorias.length,
+            itemCount: categories.length,
             itemBuilder: (context, index) {
-              final categoria = categorias[index];
+              final category = categories[index];
               return ListTile(
-                title: Text(categoria),
+                title: Text(category),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () async {
                   final nav = Navigator.of(context);
-                  final ejercicio = await nav.push(
+                  final exercise = await nav.push(
                     MaterialPageRoute(
                       builder: (_) =>
-                          ExercisesByCategories(categoria: categoria),
+                          ExercisesByCategories(category: category),
                     ),
                   );
                   if (!mounted) return;
-                  if (ejercicio != null) {
-                    nav.pop(ejercicio);
+                  if (exercise != null) {
+                    nav.pop(exercise);
                   }
                 },
               );

@@ -1,11 +1,10 @@
-﻿import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stronger/infrastructure/services/firebase/auth_service.dart';
 
-class CorporalService {
+class BodyMeasurementService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final AuthService _authService = AuthService();
 
-  // 📝 Agregar medición
   Future<void> addMeasurement(Map<String, dynamic> data) async {
     final user = _authService.currentUser;
     if (user == null) throw Exception('Usuario no autenticado');
@@ -21,7 +20,6 @@ class CorporalService {
     }
   }
 
-  // 📋 Obtener mediciones
   Stream<QuerySnapshot> getMeasurements() {
     final user = _authService.currentUser;
     if (user == null) return const Stream.empty();
@@ -34,7 +32,6 @@ class CorporalService {
         .snapshots();
   }
 
-  // 🔍 Obtener última medición
   Future<Map<String, dynamic>?> getLastMeasurement() async {
     final user = _authService.currentUser;
     if (user == null) return null;
@@ -57,7 +54,6 @@ class CorporalService {
     }
   }
 
-  // ✏️ Actualizar medición
   Future<void> updateMeasurement(String id, Map<String, dynamic> data) async {
     final user = _authService.currentUser;
     if (user == null) throw Exception('Usuario no autenticado');
@@ -74,7 +70,6 @@ class CorporalService {
     }
   }
 
-  // 🗑️ Borrar medición
   Future<void> deleteMeasurement(String id) async {
     final user = _authService.currentUser;
     if (user == null) throw Exception('Usuario no autenticado');

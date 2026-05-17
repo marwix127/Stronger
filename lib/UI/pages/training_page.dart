@@ -22,7 +22,7 @@ class TrainingPage extends StatefulWidget {
 
 class _TrainingPageState extends State<TrainingPage>
     with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
-  final TextEditingController _nombreController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   List<SelectedExercise> exercises = [];
   final TrainingService _trainingService = TrainingService();
   final Map<String, List<Series>> _exerciseHints = {};
@@ -39,7 +39,7 @@ class _TrainingPageState extends State<TrainingPage>
 
   bool get _hasUnsavedChanges {
     if (_isEditing) {
-      return _nombreController.text != widget.training!.name ||
+      return _nameController.text != widget.training!.name ||
           _exercisesChanged();
     }
     // En modo nuevo/draft: solo hay cambios si el usuario los hizo manualmente
@@ -93,7 +93,7 @@ class _TrainingPageState extends State<TrainingPage>
   void _initializeControllers() {
     // Ya están creados; solo establecer texto si estamos en edición
     if (_isEditing) {
-      _nombreController.text = widget.training!.name;
+      _nameController.text = widget.training!.name;
     }
   }
 
@@ -144,7 +144,7 @@ class _TrainingPageState extends State<TrainingPage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _nombreController.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 
@@ -163,7 +163,7 @@ class _TrainingPageState extends State<TrainingPage>
     try {
       final prefs = await SharedPreferences.getInstance();
       final draft = {
-        'name': _nombreController.text,
+        'name': _nameController.text,
         'exercises': exercises.map((e) => e.toMap()).toList(),
       };
       await prefs.setString(_draftKey, jsonEncode(draft));
@@ -183,7 +183,7 @@ class _TrainingPageState extends State<TrainingPage>
       if (!mounted) return;
 
       setState(() {
-        _nombreController.text = draft['name'] ?? '';
+        _nameController.text = draft['name'] ?? '';
         exercises = (draft['exercises'] as List<dynamic>)
             .map((e) => SelectedExercise.fromMap(e as Map<String, dynamic>))
             .toList();
@@ -361,7 +361,7 @@ class _TrainingPageState extends State<TrainingPage>
   }
 
   Future<void> _saveTraining() async {
-    final name = _nombreController.text.trim();
+    final name = _nameController.text.trim();
 
     if (name.isEmpty || exercises.isEmpty) {
       _showSnackBar('Añade un nombre y al menos un ejercicio.');
@@ -439,7 +439,7 @@ class _TrainingPageState extends State<TrainingPage>
 
   Widget _buildHeaderInputs() {
     return TextField(
-      controller: _nombreController,
+      controller: _nameController,
       decoration: const InputDecoration(
         labelText: 'Nombre del entrenamiento',
         border: OutlineInputBorder(),

@@ -1,29 +1,29 @@
-﻿import 'package:stronger/infrastructure/services/firebase/exercises_service.dart';
+import 'package:stronger/infrastructure/services/firebase/exercises_service.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class ExercisesByCategories extends StatefulWidget {
-  final String categoria;
-  const ExercisesByCategories({required this.categoria, super.key});
+  final String category;
+  const ExercisesByCategories({required this.category, super.key});
 
   @override
   State<ExercisesByCategories> createState() => _ExercisesByCategoriesState();
 }
 
 class _ExercisesByCategoriesState extends State<ExercisesByCategories> {
-  late final Future<List<Map<String, dynamic>>> _ejerciciosFuture;
+  late final Future<List<Map<String, dynamic>>> _exercisesFuture;
 
   @override
   void initState() {
     super.initState();
-    _ejerciciosFuture = EjercicioService().obtenerPorCategoria(widget.categoria);
+    _exercisesFuture = ExerciseService().getByCategory(widget.category);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.categoria),
+        title: Text(widget.category),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -32,24 +32,24 @@ class _ExercisesByCategoriesState extends State<ExercisesByCategories> {
         ],
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _ejerciciosFuture,
+        future: _exercisesFuture,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
-          final ejercicios = snapshot.data!;
+          final exercises = snapshot.data!;
           return ListView.builder(
-            itemCount: ejercicios.length,
+            itemCount: exercises.length,
             itemBuilder: (context, index) {
-              final ejercicio = ejercicios[index];
+              final exercise = exercises[index];
               return ListTile(
                 leading: const Icon(Icons.fitness_center),
-                title: Text(ejercicio['nombre']),
+                title: Text(exercise['nombre']),
                 subtitle: Text(
-                  ejercicio['descripcion'] ?? '',
+                  exercise['descripcion'] ?? '',
                   style: const TextStyle(color: Colors.grey),
                 ),
-                onTap: () => Navigator.pop(context, ejercicio),
+                onTap: () => Navigator.pop(context, exercise),
               );
             },
           );

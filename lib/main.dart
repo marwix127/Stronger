@@ -18,7 +18,7 @@ void main() async {
   final authState = AuthStateNotifier();
   router = createRouter(authState);
 
-  EjercicioService().cargarEjerciciosInicialesSiEsNecesario();
+  ExerciseService().loadInitialExercisesIfNeeded();
   await dotenv.load(fileName: "variables.env");
   runApp(ChangeNotifierProvider.value(value: authState, child: MyApp()));
 }

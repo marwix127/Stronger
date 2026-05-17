@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:stronger/infrastructure/services/firebase/exercises_service.dart';
 import 'package:go_router/go_router.dart';
 
@@ -30,7 +30,7 @@ class _AddExercisePageState extends State<AddExercisePage> {
   }
 
   Future<void> _loadCategories() async {
-    final cats = await EjercicioService().obtenerCategoriasUnicas();
+    final cats = await ExerciseService().getUniqueCategories();
     setState(() {
       _categories = cats;
       _loading = false;
@@ -112,6 +112,7 @@ class _AddExercisePageState extends State<AddExercisePage> {
                           : _nameController.text.trim();
 
                       if (name.isEmpty || category.isEmpty) {
+                        if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Completa los campos obligatorios'),
@@ -124,19 +125,22 @@ class _AddExercisePageState extends State<AddExercisePage> {
                       }
 
                       if (widget.exercise != null) {
-                        await EjercicioService()
-                            .actualizarEjercicio(widget.exercise!['id'], {
-                              'nombre': name,
-                              'descripcion': description,
-                              'categoria': category,
-                            });
+                        await ExerciseService().updateExercise(
+                          widget.exercise!['id'],
+                          {
+                            'nombre': name,
+                            'descripcion': description,
+                            'categoria': category,
+                          },
+                        );
                       } else {
-                        await EjercicioService().agregarEjercicioPersonalizado({
+                        await ExerciseService().addCustomExercise({
                           'nombre': name,
                           'descripcion': description,
                           'categoria': category,
                         });
                       }
+                      if (!context.mounted) return;
                       context.pop();
                     },
                     child: Text(

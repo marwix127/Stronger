@@ -2,8 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stronger/infrastructure/services/firebase/auth_service.dart';
 
 class BodyMeasurementService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final AuthService _authService = AuthService();
+  final FirebaseFirestore _firestore;
+  final AuthService _authService;
+
+  BodyMeasurementService({FirebaseFirestore? firestore, AuthService? authService})
+      : _firestore = firestore ?? FirebaseFirestore.instance,
+        _authService = authService ?? AuthService();
 
   Future<void> addMeasurement(Map<String, dynamic> data) async {
     final user = _authService.currentUser;

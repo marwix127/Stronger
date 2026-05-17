@@ -3,7 +3,10 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 
 class ExerciseService {
-  final _db = FirebaseFirestore.instance;
+  final FirebaseFirestore _db;
+
+  ExerciseService({FirebaseFirestore? db})
+      : _db = db ?? FirebaseFirestore.instance;
 
   Future<void> loadInitialExercisesIfNeeded() async {
     final snap = await _db.collection('ejercicios2').get();
@@ -25,7 +28,7 @@ class ExerciseService {
   Future<List<String>> getUniqueCategories() async {
     final snapshot = await _db.collection('ejercicios2').get();
     final categories = snapshot.docs
-        .map((doc) => doc['categoria'] as String?)
+        .map((doc) => doc.data()['categoria'] as String?)
         .whereType<String>()
         .toSet()
         .toList();

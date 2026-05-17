@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:596418964902:android:32558367c60a1f0f447367",
+        "mobilesdk_app_id": "1:596418964902:android:45f86b90d89cec52447367",
         "android_client_info": {
-          "package_name": "com.example.business_ia"
+          "package_name": "com.marwix127.stronger"
         }
       },
       "oauth_client": [],

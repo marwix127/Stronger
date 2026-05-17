@@ -64,7 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '596418964902',
     projectId: 'stronger-f7c9c',
     storageBucket: 'stronger-f7c9c.firebasestorage.app',
-    iosBundleId: 'com.example.businessIa',
+    iosBundleId: 'com.marwix127.stronger',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -73,7 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '596418964902',
     projectId: 'stronger-f7c9c',
     storageBucket: 'stronger-f7c9c.firebasestorage.app',
-    iosBundleId: 'com.example.businessIa',
+    iosBundleId: 'com.marwix127.stronger',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

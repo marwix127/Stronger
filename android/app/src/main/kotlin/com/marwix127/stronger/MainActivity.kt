@@ -1,4 +1,4 @@
-package com.example.stronger
+package com.marwix127.stronger
 
 import io.flutter.embedding.android.FlutterActivity
 

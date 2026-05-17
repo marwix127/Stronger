@@ -16,7 +16,7 @@ El objetivo es ofrecer una experiencia personalizada para cada usuario, permiti�
 <!-- Reemplaza estas líneas con tus imágenes reales -->
 | Inicio | Entrenamiento | Chat IA | Progreso |
 |--------|--------------|---------|---------|
-| ![Home](docs/screenshots/home.png) | ![Training](docs/screenshots/training.png) | ![AI Chat](docs/screenshots/ai_chat.png) | ![Progress](docs/screenshots/progress.png) |
+| ![Home](docs/screenshots/ScreenshotHome.jpg) | ![Training](docs/screenshots/ScreenshotTraining.jpg) | ![AI Chat](docs/screenshots/ScreenshotIA.jpg) | ![Progress](docs/screenshots/ScreenshotProgress.jpg) |
 
 ---
 

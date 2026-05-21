@@ -12,6 +12,7 @@ class MainScaffold extends StatelessWidget {
     {'icon': Icons.home, 'label': 'Inicio', 'path': '/'},
     {'icon': Icons.chat, 'label': 'Coach IA', 'path': '/ia-chat'},
     {'icon': Icons.bar_chart, 'label': 'Gráficos', 'path': '/grafics'},
+    {'icon': Icons.accessibility_new, 'label': 'Músculos', 'path': '/muscle-map'},
   ];
 
   @override

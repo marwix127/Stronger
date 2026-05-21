@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 480">
+  <!-- Body silhouette (same shape, viewed from behind) -->
+  <!-- Head -->
+  <ellipse fill="BODY_FILL_COLOR" cx="100" cy="26" rx="21" ry="23"/>
+  <!-- Neck -->
+  <rect fill="BODY_FILL_COLOR" x="91" y="47" width="18" height="17" rx="5"/>
+  <!-- Torso -->
+  <path fill="BODY_FILL_COLOR" d="M40,62 L160,62 C168,70 170,85 170,100 L170,205 C170,230 158,252 140,262 L110,268 L90,268 C62,256 30,232 30,205 L30,100 C30,85 32,70 40,62 Z"/>
+  <!-- Left upper arm -->
+  <path fill="BODY_FILL_COLOR" d="M34,68 L16,74 C8,92 6,142 10,188 L26,192 C22,148 22,100 30,80 Z"/>
+  <!-- Right upper arm -->
+  <path fill="BODY_FILL_COLOR" d="M166,68 L184,74 C192,92 194,142 190,188 L174,192 C178,148 178,100 170,80 Z"/>
+  <!-- Left forearm -->
+  <path fill="BODY_FILL_COLOR" d="M10,188 C6,218 4,262 8,298 L22,300 C18,264 18,220 24,192 Z"/>
+  <!-- Right forearm -->
+  <path fill="BODY_FILL_COLOR" d="M190,188 C194,218 196,262 192,298 L178,300 C182,264 182,220 176,192 Z"/>
+  <!-- Left thigh -->
+  <path fill="BODY_FILL_COLOR" d="M30,268 C18,274 14,288 14,304 L14,374 L80,374 L80,268 Z"/>
+  <!-- Right thigh -->
+  <path fill="BODY_FILL_COLOR" d="M170,268 C182,274 186,288 186,304 L186,374 L120,374 L120,268 Z"/>
+  <!-- Left calf -->
+  <path fill="BODY_FILL_COLOR" d="M14,374 C12,416 14,452 18,472 L78,472 L80,374 Z"/>
+  <!-- Right calf -->
+  <path fill="BODY_FILL_COLOR" d="M186,374 C188,416 186,452 182,472 L122,472 L120,374 Z"/>
+
+  <!-- MUSCLE GROUPS - BACK -->
+  <!-- Trapezius (upper back, hood shape) -->
+  <path fill="TRAPS_COLOR" opacity="0.85" d="M58,62 C58,80 72,96 100,104 C128,96 142,80 142,62 C130,64 114,66 100,67 C86,66 70,64 58,62 Z"/>
+  <!-- Lats (latissimus dorsi - V-shape from shoulder to waist) -->
+  <path fill="LATS_COLOR" opacity="0.85" d="M34,82 C26,105 22,150 28,200 L68,224 L68,145 C58,122 46,102 34,82 Z"/>
+  <path fill="LATS_COLOR" opacity="0.85" d="M166,82 C174,105 178,150 172,200 L132,224 L132,145 C142,122 154,102 166,82 Z"/>
+  <!-- Rear Shoulders (posterior deltoid) -->
+  <ellipse fill="REAR_SHOULDERS_COLOR" opacity="0.85" cx="30" cy="90" rx="16" ry="24"/>
+  <ellipse fill="REAR_SHOULDERS_COLOR" opacity="0.85" cx="170" cy="90" rx="16" ry="24"/>
+  <!-- Triceps (back of upper arm) -->
+  <ellipse fill="TRICEPS_COLOR" opacity="0.85" cx="16" cy="143" rx="9" ry="26"/>
+  <ellipse fill="TRICEPS_COLOR" opacity="0.85" cx="184" cy="143" rx="9" ry="26"/>
+  <!-- Lower Back (erector spinae - two columns) -->
+  <ellipse fill="LOWER_BACK_COLOR" opacity="0.85" cx="84" cy="220" rx="13" ry="30"/>
+  <ellipse fill="LOWER_BACK_COLOR" opacity="0.85" cx="116" cy="220" rx="13" ry="30"/>
+  <!-- Glutes (gluteus maximus) -->
+  <ellipse fill="GLUTES_COLOR" opacity="0.85" cx="67" cy="286" rx="24" ry="26"/>
+  <ellipse fill="GLUTES_COLOR" opacity="0.85" cx="133" cy="286" rx="24" ry="26"/>
+  <!-- Hamstrings (back of upper leg) -->
+  <ellipse fill="HAMSTRINGS_COLOR" opacity="0.85" cx="47" cy="322" rx="24" ry="46"/>
+  <ellipse fill="HAMSTRINGS_COLOR" opacity="0.85" cx="153" cy="322" rx="24" ry="46"/>
+</svg>

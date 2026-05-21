@@ -1,6 +1,8 @@
 ﻿import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:stronger/infrastructure/services/firebase/training_service.dart';
+import 'package:stronger/infrastructure/services/muscle_fatigue_service.dart';
 import 'package:stronger/models/selected_exercise.dart';
 import 'package:stronger/models/serie.dart';
 import 'package:stronger/models/training.dart';
@@ -25,6 +27,7 @@ class _TrainingPageState extends State<TrainingPage>
   final TextEditingController _nameController = TextEditingController();
   List<SelectedExercise> exercises = [];
   final TrainingService _trainingService = TrainingService();
+  final MuscleFatigueService _fatigueService = MuscleFatigueService();
   final Map<String, List<Series>> _exerciseHints = {};
   static const String _draftKey = 'training_draft';
 
@@ -379,6 +382,13 @@ class _TrainingPageState extends State<TrainingPage>
     try {
       await _trainingService.saveTraining(training);
       await _clearDraft(); // Limpiar borrador después de guardar
+
+      // Analizar fatiga muscular en background (fire-and-forget)
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid != null) {
+        _fatigueService.analyzeAndUpdate(training, uid);
+      }
+
       _showSnackBar('Entrenamiento guardado con éxito');
       if (mounted) context.pop(true);
     } catch (e) {

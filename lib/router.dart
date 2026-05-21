@@ -13,6 +13,7 @@ import 'UI/pages/training_page.dart';
 import 'UI/pages/exercises_categories.dart';
 import 'UI/pages/exercises_by_categories.dart';
 import 'UI/pages/grafics_page.dart';
+import 'UI/pages/muscle_map_page.dart';
 import 'UI/pages/settings_page.dart';
 import 'UI/pages/body_measurements_page.dart';
 
@@ -91,6 +92,10 @@ GoRouter createRouter(AuthStateNotifier authState) {
           GoRoute(
             path: '/grafics',
             builder: (context, state) => const GraficsPage(),
+          ),
+          GoRoute(
+            path: '/muscle-map',
+            builder: (context, state) => const MuscleMapPage(),
           ),
         ],
       ),

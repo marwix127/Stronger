@@ -99,7 +99,6 @@ class _MuscleMapPageState extends State<MuscleMapPage> {
       final ids = _muscleIds[entry.key] ?? [];
       final color = _scoreToColor(entry.value);
       for (final id in ids) {
-        // tryById returns null for unknown IDs — safe to ignore
         final info = MuscleCatalog.tryById(id);
         if (info != null) mapping[info] = color;
       }

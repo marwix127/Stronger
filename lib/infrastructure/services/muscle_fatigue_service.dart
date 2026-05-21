@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:stronger/models/training.dart';
@@ -14,10 +15,12 @@ class MuscleFatigueService {
   Future<void> analyzeAndUpdate(Training training, String uid) async {
     try {
       final scores = await _analyzeWithGemini(training);
+      debugPrint('[MuscleFatigue] Gemini scores: $scores');
       if (scores.isEmpty) return;
       await _updateFirestore(uid, scores);
-    } catch (_) {
-      // Silently fail — muscle map is a best-effort feature
+      debugPrint('[MuscleFatigue] Firestore updated OK');
+    } catch (e) {
+      debugPrint('[MuscleFatigue] ERROR: $e');
     }
   }
 
@@ -57,9 +60,10 @@ class MuscleFatigueService {
     final apiKey = dotenv.env['GEMINI_API_KEY'];
     if (apiKey == null || apiKey.isEmpty) return {};
 
-    final model = GenerativeModel(model: 'gemini-2.0-flash', apiKey: apiKey);
+    final model = GenerativeModel(model: 'gemini-2.5-flash', apiKey: apiKey);
 
-    final prompt = '''
+    final prompt =
+        '''
 Analiza este entrenamiento de fitness y devuelve ÚNICAMENTE un JSON válido con el nivel de fatiga muscular (0-100) para cada grupo muscular afectado.
 
 Grupos musculares disponibles (usa exactamente estas claves):
@@ -84,10 +88,7 @@ Ejemplo de respuesta: {"chest": 80, "frontShoulders": 45, "triceps": 60}
   }
 
   Map<String, double> _parseScores(String text) {
-    final cleaned = text
-        .replaceAll('```json', '')
-        .replaceAll('```', '')
-        .trim();
+    final cleaned = text.replaceAll('```json', '').replaceAll('```', '').trim();
 
     final start = cleaned.indexOf('{');
     final end = cleaned.lastIndexOf('}');
@@ -135,8 +136,10 @@ Ejemplo de respuesta: {"chest": 80, "frontShoulders": 45, "triceps": 60}
         if (prev != null) {
           final prevScore = (prev['score'] as num).toDouble();
           final prevAt = (prev['updatedAt'] as Timestamp).toDate();
-          combined = (_applyDecay(prevScore, prevAt) + entry.value)
-              .clamp(0.0, 100.0);
+          combined = (_applyDecay(prevScore, prevAt) + entry.value).clamp(
+            0.0,
+            100.0,
+          );
         }
       }
 

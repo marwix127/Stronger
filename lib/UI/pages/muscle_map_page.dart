@@ -16,54 +16,83 @@ class _MuscleMapPageState extends State<MuscleMapPage> {
     'chest': ['pectoralis_major_l', 'pectoralis_major_r'],
     'frontShoulders': ['anterior_deltoid_l', 'anterior_deltoid_r'],
     'biceps': [
-      'biceps_brachii_caput_longum_l', 'biceps_brachii_caput_longum_r',
-      'biceps_brachii_caput_breve_l', 'biceps_brachii_caput_breve_r',
+      'biceps_brachii_caput_longum_l',
+      'biceps_brachii_caput_longum_r',
+      'biceps_brachii_caput_breve_l',
+      'biceps_brachii_caput_breve_r',
     ],
     'forearms': [
-      'brachioradialis_l', 'brachioradialis_r',
-      'flexor_carpi_radialis_l', 'flexor_carpi_radialis_r',
-      'flexor_carpi_ulnaris_l', 'flexor_carpi_ulnaris_r',
-      'extensor_carpi_radialis_longus_l', 'extensor_carpi_radialis_longus_r',
+      'brachioradialis_l',
+      'brachioradialis_r',
+      'flexor_carpi_radialis_l',
+      'flexor_carpi_radialis_r',
+      'flexor_carpi_ulnaris_l',
+      'flexor_carpi_ulnaris_r',
+      'extensor_carpi_radialis_longus_l',
+      'extensor_carpi_radialis_longus_r',
     ],
     'abs': [
       'rectus_abdominis_1',
-      'rectus_abdominis_2_l', 'rectus_abdominis_2_r',
-      'rectus_abdominis_3_l', 'rectus_abdominis_3_r',
-      'rectus_abdominis_4_l', 'rectus_abdominis_4_r',
-      'external_oblique_1_l', 'external_oblique_1_r',
+      'rectus_abdominis_2_l',
+      'rectus_abdominis_2_r',
+      'rectus_abdominis_3_l',
+      'rectus_abdominis_3_r',
+      'rectus_abdominis_4_l',
+      'rectus_abdominis_4_r',
+      'external_oblique_1_l',
+      'external_oblique_1_r',
     ],
     'quads': [
-      'rectus_femoris_l', 'rectus_femoris_r',
-      'vastus_lateralis_l', 'vastus_lateralis_r',
-      'vastus_medialis_l', 'vastus_medialis_r',
+      'rectus_femoris_l',
+      'rectus_femoris_r',
+      'vastus_lateralis_l',
+      'vastus_lateralis_r',
+      'vastus_medialis_l',
+      'vastus_medialis_r',
     ],
     'calves': [
-      'gastrocnemius_l', 'gastrocnemius_r',
-      'tibialis_anterior_l', 'tibialis_anterior_r',
-      'fibularis_longus_l', 'fibularis_longus_r',
+      'gastrocnemius_l',
+      'gastrocnemius_r',
+      'tibialis_anterior_l',
+      'tibialis_anterior_r',
+      'fibularis_longus_l',
+      'fibularis_longus_r',
     ],
     'traps': [
-      'trapezius_upper_l', 'trapezius_upper_r',
-      'trapezius_middle_l', 'trapezius_middle_r',
-      'trapezius_lower_l', 'trapezius_lower_r',
+      'trapezius_upper_l',
+      'trapezius_upper_r',
+      'trapezius_middle_l',
+      'trapezius_middle_r',
+      'trapezius_lower_l',
+      'trapezius_lower_r',
     ],
     'lats': ['latissimus_dorsi_l', 'latissimus_dorsi_r'],
     'rearShoulders': ['posterior_deltoid_l', 'posterior_deltoid_r'],
     'triceps': [
-      'triceps_brachii_caput_laterale_l', 'triceps_brachii_caput_laterale_r',
-      'triceps_brachii_caput_longum_l', 'triceps_brachii_caput_longum_r',
-      'triceps_brachii_caput_mediale_l', 'triceps_brachii_caput_mediale_r',
+      'triceps_brachii_caput_laterale_l',
+      'triceps_brachii_caput_laterale_r',
+      'triceps_brachii_caput_longum_l',
+      'triceps_brachii_caput_longum_r',
+      'triceps_brachii_caput_mediale_l',
+      'triceps_brachii_caput_mediale_r',
     ],
     'glutes': [
-      'gluteus_maximus_l', 'gluteus_maximus_r',
-      'gluteus_medius_1_l', 'gluteus_medius_1_r',
-      'gluteus_medius_2_l', 'gluteus_medius_2_r',
+      'gluteus_maximus_l',
+      'gluteus_maximus_r',
+      'gluteus_medius_1_l',
+      'gluteus_medius_1_r',
+      'gluteus_medius_2_l',
+      'gluteus_medius_2_r',
     ],
     'hamstrings': [
-      'semimembranosus_1_l', 'semimembranosus_1_r',
-      'semimembranosus_2_l', 'semimembranosus_2_r',
-      'semitendinosus_l', 'semitendinosus_r',
-      'biceps_femoris_l', 'biceps_femoris_r',
+      'semimembranosus_1_l',
+      'semimembranosus_1_r',
+      'semimembranosus_2_l',
+      'semimembranosus_2_r',
+      'semitendinosus_l',
+      'semitendinosus_r',
+      'biceps_femoris_l',
+      'biceps_femoris_r',
     ],
     'lowerBack': [
       // erector spinae group — IDs may vary by package version
@@ -84,8 +113,9 @@ class _MuscleMapPageState extends State<MuscleMapPage> {
 
   Future<void> _loadScores() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    final scores =
-        uid != null ? await _service.loadCurrentScores(uid) : <String, double>{};
+    final scores = uid != null
+        ? await _service.loadCurrentScores(uid)
+        : <String, double>{};
     if (!mounted) return;
     setState(() {
       _scores = scores;
@@ -146,16 +176,8 @@ class _MuscleMapPageState extends State<MuscleMapPage> {
   Widget _buildToggle() {
     return SegmentedButton<bool>(
       segments: const [
-        ButtonSegment(
-          value: true,
-          label: Text('Frontal'),
-          icon: Icon(Icons.face),
-        ),
-        ButtonSegment(
-          value: false,
-          label: Text('Dorsal'),
-          icon: Icon(Icons.face_retouching_natural),
-        ),
+        ButtonSegment(value: true, label: Text('Frontal')),
+        ButtonSegment(value: false, label: Text('Dorsal')),
       ],
       selected: {_showFront},
       onSelectionChanged: (s) => setState(() => _showFront = s.first),

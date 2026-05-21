@@ -19,7 +19,7 @@ class GeminiService {
     }
 
     // Initialize model if not already done
-    _model ??= GenerativeModel(model: 'gemini-2.5-pro', apiKey: apiKey);
+    _model ??= GenerativeModel(model: 'gemini-2.5-flash', apiKey: apiKey);
 
     // Initialize chat session if not active
     if (_chatSession == null) {

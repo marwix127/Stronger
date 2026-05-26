@@ -60,7 +60,7 @@ class MuscleFatigueService {
     final apiKey = dotenv.env['GEMINI_API_KEY'];
     if (apiKey == null || apiKey.isEmpty) return {};
 
-    final model = GenerativeModel(model: 'gemini-2.5-flash', apiKey: apiKey);
+    final model = GenerativeModel(model: 'gemini-3.5-flash', apiKey: apiKey);
 
     final prompt =
         '''

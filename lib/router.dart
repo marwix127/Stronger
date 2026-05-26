@@ -13,9 +13,8 @@ import 'UI/pages/training_page.dart';
 import 'UI/pages/exercises_categories.dart';
 import 'UI/pages/exercises_by_categories.dart';
 import 'UI/pages/grafics_page.dart';
-import 'UI/pages/muscle_map_page.dart';
+import 'UI/pages/body_page.dart';
 import 'UI/pages/settings_page.dart';
-import 'UI/pages/body_measurements_page.dart';
 
 late final GoRouter router;
 
@@ -72,10 +71,6 @@ GoRouter createRouter(AuthStateNotifier authState) {
         path: '/settings',
         builder: (context, state) => const SettingsPage(),
       ),
-      GoRoute(
-        path: '/body-measurements',
-        builder: (context, state) => const BodyMeasurementsPage(),
-      ),
       ShellRoute(
         builder: (context, state, child) {
           return MainScaffold(child: child);
@@ -95,7 +90,7 @@ GoRouter createRouter(AuthStateNotifier authState) {
           ),
           GoRoute(
             path: '/muscle-map',
-            builder: (context, state) => const MuscleMapPage(),
+            builder: (context, state) => const BodyPage(),
           ),
         ],
       ),

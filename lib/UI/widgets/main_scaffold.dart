@@ -10,9 +10,9 @@ class MainScaffold extends StatelessWidget {
 
   static final tabs = [
     {'icon': Icons.home, 'label': 'Inicio', 'path': '/'},
-    {'icon': Icons.chat, 'label': 'Coach IA', 'path': '/ia-chat'},
+    {'icon': Icons.accessibility_new, 'label': 'Cuerpo', 'path': '/muscle-map'},
     {'icon': Icons.bar_chart, 'label': 'Gráficos', 'path': '/grafics'},
-    {'icon': Icons.accessibility_new, 'label': 'Músculos', 'path': '/muscle-map'},
+    {'icon': Icons.chat, 'label': 'Coach IA', 'path': '/ia-chat'},
   ];
 
   @override
@@ -95,16 +95,6 @@ class MainScaffold extends StatelessWidget {
               onTap: () {
                 AuthService().signOut();
                 context.go('/login');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.accessibility_new),
-              title: const Text('Datos Corporales'),
-              selected: currentLocation == '/body-measurements',
-              selectedColor: colorScheme.primary,
-              selectedTileColor: colorScheme.primary.withAlpha(31),
-              onTap: () {
-                context.push('/body-measurements');
               },
             ),
             ListTile(

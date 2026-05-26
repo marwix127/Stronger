@@ -107,7 +107,6 @@ class _GraficsPageState extends State<GraficsPage> {
         : calculateAverageWeightPerExercise(_trainings, _selectedExercise!);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Volumen de Entrenamiento")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -128,7 +127,9 @@ class _GraficsPageState extends State<GraficsPage> {
               segments: const [
                 ButtonSegment(value: 'Volume', label: Text('Volumen')),
                 ButtonSegment(
-                    value: 'Average Weight', label: Text('Peso Medio')),
+                  value: 'Average Weight',
+                  label: Text('Peso Medio'),
+                ),
               ],
               selected: {_chartType},
               onSelectionChanged: (Set<String> newSelection) {

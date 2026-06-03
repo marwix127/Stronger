@@ -11,8 +11,8 @@ class GeminiService {
   Future<String> generateReply(
     String userMessage, {
     required String uid,
-    int maxTrainings = 200,
-    int maxBodyMeasurements = 100,
+    int maxTrainings = 150,
+    int maxBodyMeasurements = 80,
   }) async {
     final apiKey = dotenv.env['GEMINI_API_KEY'];
     if (apiKey == null || apiKey.isEmpty) {
@@ -25,7 +25,10 @@ class GeminiService {
     // Initialize chat session if not active
     if (_chatSession == null) {
       final historyContext = await _fetchAndFormatHistory(uid, maxTrainings);
-      final bodyContext = await _fetchAndFormatBodyData(uid, maxBodyMeasurements);
+      final bodyContext = await _fetchAndFormatBodyData(
+        uid,
+        maxBodyMeasurements,
+      );
 
       _chatSession = _model!.startChat(
         history: [
@@ -109,7 +112,8 @@ Usa toda esta información para dar respuestas personalizadas y precisas sobre s
         .limit(limit)
         .get();
 
-    if (snapshot.docs.isEmpty) return 'No hay mediciones corporales registradas.';
+    if (snapshot.docs.isEmpty)
+      return 'No hay mediciones corporales registradas.';
 
     final buffer = StringBuffer();
     for (final doc in snapshot.docs) {
@@ -121,8 +125,10 @@ Usa toda esta información para dar respuestas personalizadas y precisas sobre s
       final parts = <String>[];
       if (d['weight'] != null) parts.add('Peso: ${d['weight']} kg');
       if (d['height'] != null) parts.add('Altura: ${d['height']} cm');
-      if (d['fat_percentage'] != null) parts.add('Grasa: ${d['fat_percentage']}%');
-      if (d['muscle_mass'] != null) parts.add('Músculo: ${d['muscle_mass']} kg');
+      if (d['fat_percentage'] != null)
+        parts.add('Grasa: ${d['fat_percentage']}%');
+      if (d['muscle_mass'] != null)
+        parts.add('Músculo: ${d['muscle_mass']} kg');
       buffer.writeln('- $dateStr: ${parts.join(', ')}');
     }
     return buffer.toString();

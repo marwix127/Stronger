@@ -11,7 +11,8 @@ class GeminiService {
   Future<String> generateReply(
     String userMessage, {
     required String uid,
-    int maxTrainings = 50,
+    int maxTrainings = 200,
+    int maxBodyMeasurements = 100,
   }) async {
     final apiKey = dotenv.env['GEMINI_API_KEY'];
     if (apiKey == null || apiKey.isEmpty) {
@@ -24,6 +25,7 @@ class GeminiService {
     // Initialize chat session if not active
     if (_chatSession == null) {
       final historyContext = await _fetchAndFormatHistory(uid, maxTrainings);
+      final bodyContext = await _fetchAndFormatBodyData(uid, maxBodyMeasurements);
 
       _chatSession = _model!.startChat(
         history: [
@@ -33,7 +35,10 @@ Eres un entrenador personal virtual experto.
 Aquí tienes el historial detallado de los últimos entrenamientos del usuario:
 $historyContext
 
-Usa esta información para dar respuestas personalizadas y precisas sobre su progreso, pesos, y frecuencia. Intenta ser breve y conciso en tus respuestas. 
+Mediciones corporales recientes del usuario:
+$bodyContext
+
+Usa toda esta información para dar respuestas personalizadas y precisas sobre su progreso, composición corporal, pesos y frecuencia de entrenamiento. Intenta ser breve y conciso en tus respuestas.
 '''),
           ]),
           Content('model', [
@@ -93,6 +98,34 @@ Usa esta información para dar respuestas personalizadas y precisas sobre su pro
     }).toList();
 
     return _formatTrainingHistory(trainings);
+  }
+
+  Future<String> _fetchAndFormatBodyData(String uid, int limit) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('body_measurements')
+        .orderBy('date', descending: true)
+        .limit(limit)
+        .get();
+
+    if (snapshot.docs.isEmpty) return 'No hay mediciones corporales registradas.';
+
+    final buffer = StringBuffer();
+    for (final doc in snapshot.docs) {
+      final d = doc.data();
+      final date = (d['date'] as Timestamp?)?.toDate();
+      final dateStr = date != null
+          ? '${date.day}/${date.month}/${date.year}'
+          : 'Fecha desconocida';
+      final parts = <String>[];
+      if (d['weight'] != null) parts.add('Peso: ${d['weight']} kg');
+      if (d['height'] != null) parts.add('Altura: ${d['height']} cm');
+      if (d['fat_percentage'] != null) parts.add('Grasa: ${d['fat_percentage']}%');
+      if (d['muscle_mass'] != null) parts.add('Músculo: ${d['muscle_mass']} kg');
+      buffer.writeln('- $dateStr: ${parts.join(', ')}');
+    }
+    return buffer.toString();
   }
 
   String _formatTrainingHistory(List<Map<String, dynamic>> trainings) {

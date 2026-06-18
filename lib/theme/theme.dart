@@ -11,10 +11,14 @@ class AppTheme {
   static final ThemeData darkTheme =
       _buildTheme(AppColors.dark, Brightness.dark);
 
+  // Radios de forma (identidad Neura).
+  static const double _cardRadius = 18;
+  static const double _buttonRadius = 12;
+  static const double _inputRadius = 12;
+
   static ThemeData _buildTheme(AppColors c, Brightness brightness) {
     final isDark = brightness == Brightness.dark;
-    final base =
-        isDark ? const ColorScheme.dark() : const ColorScheme.light();
+    final base = isDark ? const ColorScheme.dark() : const ColorScheme.light();
 
     final colorScheme = base.copyWith(
       primary: c.accent, // cyan — acento primario
@@ -38,63 +42,43 @@ class AppTheme {
       surfaceContainerHighest: c.surfaceRaised,
     );
 
+    final textTheme = _buildTextTheme(c, brightness);
+
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
       colorScheme: colorScheme,
       extensions: <ThemeExtension<dynamic>>[c],
       scaffoldBackgroundColor: c.canvas,
+      textTheme: textTheme,
       appBarTheme: AppBarTheme(
         backgroundColor: c.canvas,
         foregroundColor: c.textPrimary,
         centerTitle: true,
         elevation: 0,
-        titleTextStyle: TextStyle(
-          color: c.textPrimary,
-          fontSize: 20,
-          fontWeight: FontWeight.w500,
-        ),
+        titleTextStyle: textTheme.titleLarge?.copyWith(fontSize: 20),
         iconTheme: IconThemeData(color: c.textPrimary),
-      ),
-      textTheme: TextTheme(
-        titleLarge: TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.w500,
-          color: c.textPrimary,
-        ),
-        titleMedium: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-          color: c.textPrimary,
-        ),
-        bodyLarge: TextStyle(
-          fontSize: 16,
-          letterSpacing: 0.15,
-          color: c.textPrimary,
-        ),
-        bodyMedium: TextStyle(
-          fontSize: 14,
-          letterSpacing: 0.25,
-          color: c.textSecondary,
-        ),
       ),
       cardTheme: CardThemeData(
         color: c.surface,
         elevation: 2,
         shadowColor: isDark ? Colors.black.withValues(alpha: 0.4) : c.border,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_cardRadius),
+        ),
       ),
       inputDecorationTheme: InputDecorationTheme(
-        border: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(8)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(_inputRadius),
+          borderSide: BorderSide(color: c.border),
         ),
         filled: true,
         fillColor: c.surfaceRaised,
         hintStyle: TextStyle(color: c.textMuted),
         labelStyle: TextStyle(color: c.textSecondary),
         focusedBorder: OutlineInputBorder(
-          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          borderRadius: BorderRadius.circular(_inputRadius),
           borderSide: BorderSide(color: c.accent, width: 2),
         ),
       ),
@@ -103,15 +87,20 @@ class AppTheme {
           backgroundColor: c.accent,
           foregroundColor: c.onAccent,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(_buttonRadius),
+          ),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: c.accent,
           foregroundColor: c.onAccent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(_buttonRadius),
+          ),
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
@@ -136,6 +125,58 @@ class AppTheme {
               ? Colors.transparent
               : c.textMuted,
         ),
+      ),
+    );
+  }
+
+  /// TextTheme de marca con la fuente por defecto (Material/Roboto):
+  /// titulares w800 / -0.5, cuerpo w400-w500.
+  static TextTheme _buildTextTheme(AppColors c, Brightness brightness) {
+    final t = brightness == Brightness.dark
+        ? Typography.material2021().white
+        : Typography.material2021().black;
+
+    TextStyle? heading(TextStyle? s) => s?.copyWith(
+      fontWeight: FontWeight.w800,
+      letterSpacing: -0.5,
+      color: c.textPrimary,
+    );
+
+    return t.copyWith(
+      displayLarge: heading(t.displayLarge),
+      displayMedium: heading(t.displayMedium),
+      displaySmall: heading(t.displaySmall),
+      headlineLarge: heading(t.headlineLarge),
+      headlineMedium: heading(t.headlineMedium),
+      headlineSmall: heading(t.headlineSmall),
+      titleLarge: heading(t.titleLarge)?.copyWith(fontSize: 22),
+      titleMedium: t.titleMedium?.copyWith(
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.2,
+        color: c.textPrimary,
+      ),
+      titleSmall: t.titleSmall?.copyWith(
+        fontWeight: FontWeight.w600,
+        color: c.textPrimary,
+      ),
+      bodyLarge: t.bodyLarge?.copyWith(
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.15,
+        color: c.textPrimary,
+      ),
+      bodyMedium: t.bodyMedium?.copyWith(
+        fontWeight: FontWeight.w400,
+        letterSpacing: 0.25,
+        color: c.textSecondary,
+      ),
+      bodySmall: t.bodySmall?.copyWith(
+        fontWeight: FontWeight.w400,
+        color: c.textMuted,
+      ),
+      labelLarge: t.labelLarge?.copyWith(
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0,
+        color: c.textPrimary,
       ),
     );
   }

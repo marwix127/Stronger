@@ -22,7 +22,7 @@ class VolumenChart extends StatelessWidget {
     double maxY = 0;
     double minY = double.infinity;
     for (var item in sortedData) {
-      final val = (item['volumen'] as num).toDouble();
+      final val = (item['volume'] as num).toDouble();
       if (val > maxY) maxY = val;
       if (val < minY) minY = val;
     }
@@ -104,7 +104,7 @@ class VolumenChart extends StatelessWidget {
               for (int i = 0; i < sortedData.length; i++)
                 FlSpot(
                   i.toDouble(),
-                  (sortedData[i]['volumen'] as num).toDouble(),
+                  (sortedData[i]['volume'] as num).toDouble(),
                 ),
             ],
             isCurved: true,

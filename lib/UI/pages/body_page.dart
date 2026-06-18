@@ -23,15 +23,15 @@ class BodyPage extends StatelessWidget {
           toolbarHeight: 0,
           bottom: const TabBar(
             tabs: [
-              Tab(icon: Icon(Icons.accessibility_new), text: 'Fatiga'),
               Tab(
                 icon: Icon(Icons.monitor_weight_outlined),
                 text: 'Mediciones',
               ),
+              Tab(icon: Icon(Icons.accessibility_new), text: 'Fatiga'),
             ],
           ),
         ),
-        body: const TabBarView(children: [_MuscleFatigueTab(), _BodyDataTab()]),
+        body: const TabBarView(children: [_BodyDataTab(), _MuscleFatigueTab()]),
       ),
     );
   }

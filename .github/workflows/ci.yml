@@ -90,3 +90,62 @@ jobs:
           --only firestore
           --project stronger-rules-test
           "npm test --prefix firebase-tests"
+
+  android-e2e:
+    name: Android end-to-end
+    needs: [flutter, firestore-rules]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      ORG_GRADLE_PROJECT_E2E: "true"
+      GRADLE_OPTS: "-DE2E=true"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.0
+          channel: stable
+          cache: true
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run E2E against Firebase Emulator Suite
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7
+          ndk: 28.2.13676358
+          script: |
+            adb reverse tcp:8080 tcp:8080
+            adb reverse tcp:9099 tcp:9099
+            device="$(adb devices | awk 'NR == 2 { print $1 }')"
+            npx --yes firebase-tools@15.17.0 emulators:exec \
+              --only auth,firestore \
+              --project stronger-f7c9c \
+              "flutter test integration_test/app_test.dart -d ${device} --dart-define=USE_FIREBASE_EMULATORS=true"

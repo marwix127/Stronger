@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'exercises_categories.dart';
 
+const _useFirebaseEmulators = bool.fromEnvironment('USE_FIREBASE_EMULATORS');
+
 class TrainingPage extends StatefulWidget {
   final Training? training;
   final bool loadDraft;
@@ -391,7 +393,7 @@ class _TrainingPageState extends State<TrainingPage>
       await _clearDraft(); // Limpiar borrador después de guardar
 
       final uid = _getUid();
-      if (!_isEditing && uid != null) {
+      if (!_isEditing && uid != null && !_useFirebaseEmulators) {
         unawaited(_fatigueService.analyzeAndUpdate(training, uid));
       }
 

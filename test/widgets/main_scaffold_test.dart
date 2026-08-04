@@ -35,6 +35,20 @@ void main() {
           path: '/login',
           builder: (_, _) => const Scaffold(body: Text('Login destino')),
         ),
+        GoRoute(
+          path: '/exercise-management',
+          builder: (_, _) => Scaffold(
+            appBar: AppBar(),
+            body: const Text('Gestión de ejercicios'),
+          ),
+        ),
+        GoRoute(
+          path: '/settings',
+          builder: (_, _) => Scaffold(
+            appBar: AppBar(),
+            body: const Text('Ajustes destino'),
+          ),
+        ),
         ShellRoute(
           builder: (_, _, child) => MainScaffold(
             authService: authService,
@@ -89,5 +103,23 @@ void main() {
 
     verify(() => authService.signOut()).called(1);
     expect(find.text('Login destino'), findsOneWidget);
+  });
+
+  testWidgets('closes the drawer before opening a secondary route', (
+    tester,
+  ) async {
+    await pumpRouter(tester);
+    await tester.tap(find.byTooltip('Open navigation menu'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Gestionar Ejercicios'));
+    await tester.pumpAndSettle();
+    expect(find.text('Gestión de ejercicios'), findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    final scaffold = tester.state<ScaffoldState>(find.byType(Scaffold));
+    expect(scaffold.isDrawerOpen, isFalse);
   });
 }

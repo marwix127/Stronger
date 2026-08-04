@@ -74,6 +74,7 @@ class MainScaffold extends StatelessWidget {
               selectedColor: colorScheme.primary,
               selectedTileColor: colorScheme.primary.withAlpha(31),
               onTap: () {
+                Navigator.of(context).pop();
                 context.push('/exercise-management');
               },
             ),
@@ -100,9 +101,10 @@ class MainScaffold extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.exit_to_app),
               title: const Text('Cerrar sesión'),
-              onTap: () {
-                auth.signOut();
-                context.go('/login');
+              onTap: () async {
+                Navigator.of(context).pop();
+                await auth.signOut();
+                if (context.mounted) context.go('/login');
               },
             ),
             ListTile(
@@ -112,6 +114,7 @@ class MainScaffold extends StatelessWidget {
               selectedColor: colorScheme.primary,
               selectedTileColor: colorScheme.primary.withAlpha(31),
               onTap: () {
+                Navigator.of(context).pop();
                 context.push('/settings');
               },
             ),

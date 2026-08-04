@@ -8,10 +8,14 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val isE2eBuild =
+    providers.gradleProperty("E2E").orNull == "true" ||
+        providers.systemProperty("E2E").orNull == "true"
+
 android {
     namespace = "com.marwix127.stronger"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "27.0.12077973"
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -34,11 +38,22 @@ android {
     }
 
     buildTypes {
+        debug {
+            if (isE2eBuild) {
+                applicationIdSuffix = ".e2e"
+            }
+        }
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
+    }
+}
+
+tasks.configureEach {
+    if (isE2eBuild && name.endsWith("GoogleServices")) {
+        enabled = false
     }
 }
 

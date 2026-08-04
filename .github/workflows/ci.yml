@@ -144,8 +144,10 @@ jobs:
           script: |
             adb reverse tcp:8080 tcp:8080
             adb reverse tcp:9099 tcp:9099
-            device="$(adb devices | awk 'NR == 2 { print $1 }')"
+            device="$(adb get-serialno)"
+            flutter_bin="$(command -v flutter)"
+            test -x "${flutter_bin}"
             npx --yes firebase-tools@15.17.0 emulators:exec \
               --only auth,firestore \
               --project stronger-f7c9c \
-              "flutter test integration_test/app_test.dart -d ${device} --dart-define=USE_FIREBASE_EMULATORS=true"
+              "${flutter_bin} test integration_test/app_test.dart -d ${device} --dart-define=USE_FIREBASE_EMULATORS=true"

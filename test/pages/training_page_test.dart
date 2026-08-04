@@ -188,6 +188,39 @@ void main() {
     verifyNever(() => fatigueService.analyzeAndUpdate(any(), any()));
   });
 
+  testWidgets('removes the selected series instead of the last visible row', (
+    tester,
+  ) async {
+    final original = Training(
+      id: 'training-1',
+      name: 'Tres series',
+      weight: null,
+      date: DateTime(2025, 12, 1),
+      exercises: [
+        SelectedExercise(
+          id: 'squat',
+          name: 'Sentadilla',
+          category: 'Piernas',
+          series: [
+            Series(repetitions: 1, weight: 10),
+            Series(repetitions: 2, weight: 20),
+            Series(repetitions: 3, weight: 30),
+          ],
+        ),
+      ],
+    );
+    await pumpPage(tester, training: original);
+
+    await tester.tap(find.byIcon(Icons.remove_circle).at(1));
+    await tester.pump();
+
+    final visibleValues = tester
+        .widgetList<EditableText>(find.byType(EditableText))
+        .map((field) => field.controller.text)
+        .toList();
+    expect(visibleValues, ['Tres series', '10.0', '1', '30.0', '3']);
+  });
+
   testWidgets('offers to save unsaved new work as a draft', (tester) async {
     await pumpPage(tester);
     await tester.enterText(find.byType(TextField).first, 'Trabajo pendiente');

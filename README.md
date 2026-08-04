@@ -108,7 +108,7 @@ npm install --prefix firebase-tests
 firebase emulators:exec --only firestore "npm test --prefix firebase-tests"
 ```
 
-Actualmente la suite Flutter contiene 161 tests unitarios, de widgets y de
+Actualmente la suite Flutter contiene 162 tests unitarios, de widgets y de
 flujo, con un 84,9 % de cobertura instrumentada. Las reglas añaden pruebas
 específicas de acceso anónimo, aislamiento entre usuarios y propiedad de los
 ejercicios personalizados.

@@ -105,6 +105,7 @@ class ExerciseCard extends StatelessWidget {
                     ? hints![j]
                     : null;
                 return SeriesRow(
+                  key: ObjectKey(exercise.series[j]),
                   series: exercise.series[j],
                   hintWeight: hint?.weight,
                   hintReps: hint?.repetitions,

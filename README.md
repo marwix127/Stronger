@@ -4,7 +4,8 @@
 ![Dart](https://img.shields.io/badge/Dart-3-0175C2?logo=dart&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore-FFCA28?logo=firebase&logoColor=black)
 ![Gemini](https://img.shields.io/badge/Firebase_AI_Logic-Gemini_3.5-4285F4?logo=google&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-Flutter-success)
+[![CI](https://github.com/marwix127/Stronger/actions/workflows/ci.yml/badge.svg)](https://github.com/marwix127/Stronger/actions/workflows/ci.yml)
+![Coverage](https://img.shields.io/badge/coverage-85.5%25-brightgreen)
 
 Stronger es una aplicación Flutter para registrar entrenamientos, consultar la
 evolución física y recibir orientación personalizada mediante Gemini. Está
@@ -103,10 +104,14 @@ npm install --prefix firebase-tests
 firebase emulators:exec --only firestore "npm test --prefix firebase-tests"
 ```
 
-Actualmente la suite Flutter contiene 153 tests unitarios, de widgets y de
-flujo, con más del 80 % de cobertura instrumentada. Las reglas añaden pruebas
+Actualmente la suite Flutter contiene 160 tests unitarios, de widgets y de
+flujo, con un 85,5 % de cobertura instrumentada. Las reglas añaden pruebas
 específicas de acceso anónimo, aislamiento entre usuarios y propiedad de los
 ejercicios personalizados.
+
+GitHub Actions ejecuta en cada `push` y `pull request` el análisis estático, la
+suite Flutter, un umbral mínimo del 80 % de cobertura, la compilación Android y
+las pruebas de reglas contra el emulador de Firestore.
 
 ## Estructura principal
 

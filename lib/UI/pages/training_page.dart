@@ -1,4 +1,5 @@
-﻿import 'dart:convert';
+import 'dart:convert';
+import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:stronger/infrastructure/services/firebase/training_service.dart';
@@ -33,6 +34,7 @@ class _TrainingPageState extends State<TrainingPage>
 
   // true solo cuando el usuario modifica algo desde la última carga/guardado
   bool _isDirty = false;
+  bool _saving = false;
 
   bool get _isEditing => widget.training != null;
 
@@ -242,9 +244,7 @@ class _TrainingPageState extends State<TrainingPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('¿Salir sin guardar?'),
-        content: const Text(
-          'Hay cambios sin guardar. ¿Qué quieres hacer?',
-        ),
+        content: const Text('Hay cambios sin guardar. ¿Qué quieres hacer?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop('draft'),
@@ -261,9 +261,9 @@ class _TrainingPageState extends State<TrainingPage>
     if (result == 'draft') {
       await _saveDraft();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Borrador guardado')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Borrador guardado')));
       }
       return true; // Salir tras guardar el draft
     }
@@ -364,6 +364,7 @@ class _TrainingPageState extends State<TrainingPage>
   }
 
   Future<void> _saveTraining() async {
+    if (_saving) return;
     final name = _nameController.text.trim();
 
     if (name.isEmpty || exercises.isEmpty) {
@@ -379,20 +380,22 @@ class _TrainingPageState extends State<TrainingPage>
       exercises: exercises,
     );
 
+    setState(() => _saving = true);
     try {
       await _trainingService.saveTraining(training);
       await _clearDraft(); // Limpiar borrador después de guardar
 
-      // Analizar fatiga muscular en background (fire-and-forget)
       final uid = FirebaseAuth.instance.currentUser?.uid;
-      if (uid != null) {
-        _fatigueService.analyzeAndUpdate(training, uid);
+      if (!_isEditing && uid != null) {
+        unawaited(_fatigueService.analyzeAndUpdate(training, uid));
       }
 
       _showSnackBar('Entrenamiento guardado con éxito');
       if (mounted) context.pop(true);
     } catch (e) {
       _showSnackBar('Error al guardar: $e', isError: true);
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
   }
 
@@ -404,45 +407,45 @@ class _TrainingPageState extends State<TrainingPage>
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return; // Ya se ejecutó el pop, no hacer nada
-        if (await _confirmExit() && mounted) {
-          context.pop();
-        }
+        final shouldExit = await _confirmExit();
+        if (!context.mounted || !shouldExit) return;
+        context.pop();
       },
       child: Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () async {
-            if (await _confirmExit() && mounted) {
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () async {
+              final shouldExit = await _confirmExit();
+              if (!context.mounted || !shouldExit) return;
               context.pop();
-            }
-          },
-        ),
-        title: Text(_isEditing ? 'Editar entrenamiento' : 'Entrenamiento'),
-        actions: [
-          if (_isEditing)
-            IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: _confirmDelete,
-            ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildHeaderInputs(),
-            const SizedBox(height: 16),
-            Expanded(
-              child: exercises.isEmpty
-                  ? const Center(child: Text("No hay ejercicios añadidos."))
-                  : _buildExercisesList(),
-            ),
-            _buildActionButtons(),
+            },
+          ),
+          title: Text(_isEditing ? 'Editar entrenamiento' : 'Entrenamiento'),
+          actions: [
+            if (_isEditing)
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: _confirmDelete,
+              ),
           ],
         ),
-      ),
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildHeaderInputs(),
+              const SizedBox(height: 16),
+              Expanded(
+                child: exercises.isEmpty
+                    ? const Center(child: Text("No hay ejercicios añadidos."))
+                    : _buildExercisesList(),
+              ),
+              _buildActionButtons(),
+            ],
+          ),
+        ),
       ), // cierre Scaffold
     ); // cierre PopScope
   }
@@ -500,7 +503,7 @@ class _TrainingPageState extends State<TrainingPage>
         SizedBox(
           height: 50,
           child: ElevatedButton.icon(
-            onPressed: _saveTraining,
+            onPressed: _saving ? null : _saveTraining,
             icon: const Icon(Icons.save),
             label: const Text("Guardar"),
             style: ElevatedButton.styleFrom(minimumSize: const Size(120, 50)),

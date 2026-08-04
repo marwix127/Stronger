@@ -1,5 +1,5 @@
 name: stronger
-description: "A new Flutter project."
+description: "Fitness tracking app with progress analytics and an AI coach."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -33,8 +33,9 @@ dependencies:
   go_router: ^16.2.4
   firebase_core: ^4.1.1
   firebase_auth: ^6.1.0
+  firebase_ai: ^3.14.1
+  firebase_app_check: ^0.4.5+2
   fl_chart: ^0.66.2
-  flutter_dotenv: ^5.1.0
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
@@ -43,7 +44,6 @@ dependencies:
   http: ^1.2.0
   shared_preferences: ^2.5.3
   intl: ^0.19.0
-  google_generative_ai: ^0.4.7
   flutter_svg: ^2.0.0
   flutter_body_atlas: ^0.1.4
 
@@ -53,7 +53,7 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
   flutter_lints: ^5.0.0
   mocktail: ^1.0.4
-  fake_cloud_firestore: ^4.1.0+1
+  fake_cloud_firestore: ^4.2.0
     
 flutter_launcher_icons:
   android: true
@@ -68,8 +68,6 @@ flutter_launcher_icons:
 flutter:
   assets:
     - assets/ejercicios2.json
-    - variables.env
-   
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

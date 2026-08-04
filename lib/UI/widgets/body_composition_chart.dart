@@ -1,4 +1,4 @@
-﻿import 'package:stronger/models/measurement.dart';
+import 'package:stronger/models/measurement.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -72,13 +72,13 @@ class _BodyCompositionChartState extends State<BodyCompositionChart> {
 
     Color lineColor;
     switch (_selectedMetric) {
-      case 'Peso':
+      case 'Weight':
         lineColor = Colors.blue;
         break;
-      case 'Grasa':
+      case 'Fat':
         lineColor = Colors.red;
         break;
-      case 'Músculo':
+      case 'Muscle':
         lineColor = Colors.green;
         break;
       default:
@@ -95,7 +95,7 @@ class _BodyCompositionChartState extends State<BodyCompositionChart> {
             ChoiceChip(
               label: const Text('Peso (kg)'),
               selected: _selectedMetric == 'Weight',
-              selectedColor: Colors.blue.withOpacity(0.2),
+              selectedColor: Colors.blue.withValues(alpha: 0.2),
               onSelected: (selected) {
                 if (selected) setState(() => _selectedMetric = 'Weight');
               },
@@ -103,7 +103,7 @@ class _BodyCompositionChartState extends State<BodyCompositionChart> {
             ChoiceChip(
               label: const Text('Grasa (%)'),
               selected: _selectedMetric == 'Fat',
-              selectedColor: Colors.red.withOpacity(0.2),
+              selectedColor: Colors.red.withValues(alpha: 0.2),
               onSelected: (selected) {
                 if (selected) setState(() => _selectedMetric = 'Fat');
               },
@@ -111,7 +111,7 @@ class _BodyCompositionChartState extends State<BodyCompositionChart> {
             ChoiceChip(
               label: const Text('Músculo (kg)'),
               selected: _selectedMetric == 'Muscle',
-              selectedColor: Colors.green.withOpacity(0.2),
+              selectedColor: Colors.green.withValues(alpha: 0.2),
               onSelected: (selected) {
                 if (selected) setState(() => _selectedMetric = 'Muscle');
               },
@@ -132,7 +132,7 @@ class _BodyCompositionChartState extends State<BodyCompositionChart> {
                   drawVerticalLine: false,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
-                      color: Colors.grey.withOpacity(0.2),
+                      color: Colors.grey.withValues(alpha: 0.2),
                       strokeWidth: 1,
                     );
                   },
@@ -200,7 +200,7 @@ class _BodyCompositionChartState extends State<BodyCompositionChart> {
                     dotData: const FlDotData(show: true),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: lineColor.withOpacity(0.1),
+                      color: lineColor.withValues(alpha: 0.1),
                     ),
                   ),
                 ],

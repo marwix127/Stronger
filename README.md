@@ -1,108 +1,113 @@
-# 💪 Stronger — Fitness & AI Coach App
+# 💪 Stronger — Fitness & AI Coach
 
-![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=flat&logo=flutter&logoColor=white)
-![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?style=flat&logo=dart&logoColor=white)
-![Firebase](https://img.shields.io/badge/Firebase-Firestore%20%7C%20Auth-FFCA28?style=flat&logo=firebase&logoColor=black)
-![Gemini AI](https://img.shields.io/badge/Gemini-AI%20Coach-4285F4?style=flat&logo=google&logoColor=white)
-![Platforms](https://img.shields.io/badge/Platforms-Android%20%7C%20iOS%20%7C%20Web-lightgrey?style=flat)
+![Flutter](https://img.shields.io/badge/Flutter-3.44-02569B?logo=flutter&logoColor=white)
+![Dart](https://img.shields.io/badge/Dart-3-0175C2?logo=dart&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore-FFCA28?logo=firebase&logoColor=black)
+![Gemini](https://img.shields.io/badge/Firebase_AI_Logic-Gemini_3.5-4285F4?logo=google&logoColor=white)
+![Tests](https://img.shields.io/badge/tests-Flutter-success)
 
-**Stronger** es una aplicación móvil desarrollada en **Flutter** que combina el seguimiento de entrenamientos, análisis de progreso y asistencia inteligente mediante IA.
-El objetivo es ofrecer una experiencia personalizada para cada usuario, permitiéndole registrar, analizar y mejorar su rendimiento físico día a día.
+Stronger es una aplicación Flutter para registrar entrenamientos, consultar la
+evolución física y recibir orientación personalizada mediante Gemini. Está
+planteada como un proyecto de portfolio: arquitectura clara, datos aislados por
+usuario, tests automatizados y una integración de IA segura para aplicaciones
+móviles.
 
----
+## Capturas
 
-## 📸 Capturas de pantalla
-
-<!-- Reemplaza estas líneas con tus imágenes reales -->
 | Inicio | Entrenamiento | Chat IA | Progreso |
-|--------|--------------|---------|---------|
+|---|---|---|---|
 | ![Home](docs/screenshots/ScreenshotHome.jpg) | ![Training](docs/screenshots/ScreenshotTraining.jpg) | ![AI Chat](docs/screenshots/ScreenshotIA.jpg) | ![Progress](docs/screenshots/ScreenshotProgress.jpg) |
 
----
+## Funcionalidades
 
-## 🚀 Características principales
+- Autenticación por email mediante Firebase Auth.
+- Creación, edición e historial de entrenamientos con borradores locales.
+- Sugerencias de series basadas en el entrenamiento anterior.
+- Gráficos de volumen, peso medio y composición corporal.
+- Mapa corporal con estimación y recuperación progresiva de fatiga muscular.
+- Coach contextual que analiza los entrenamientos y medidas del usuario.
+- Tema claro y oscuro y navegación declarativa con GoRouter.
 
-- 🔐 **Autenticación segura con Firebase Auth** — registro e inicio de sesión por email.
-- 🏋️‍♂️ **Gestión de entrenamientos personalizados** — crea sesiones con ejercicios y series, guarda borradores automáticamente.
-- 📊 **Historial de entrenamientos** — visualiza y edita todas tus sesiones anteriores.
-- 📈 **Análisis de progreso** — gráficos de volumen y peso medio por ejercicio a lo largo del tiempo.
-- 📏 **Medidas corporales** — registra y visualiza tu evolución de peso, grasa y músculo.
-- 🤖 **Asistente con IA (Gemini)** — chat que analiza tu historial real de entrenamientos y responde preguntas personalizadas.
-- ☁️ **Sincronización en la nube** con Firebase Firestore.
-- 🎨 **Tema claro y oscuro**, con navegación declarativa mediante GoRouter.
+## Arquitectura de IA
 
----
+```text
+Flutter ── App Check + Firebase Auth ──> Firebase AI Logic ──> Gemini
+   │
+   └── Firestore: datos del usuario autenticado
+```
 
-## 🛠️ Tecnologías utilizadas
+La aplicación utiliza el SDK oficial `firebase_ai`. Las peticiones pasan por el
+proxy de Firebase AI Logic, por lo que la credencial de Gemini no se incluye en
+el código, APK o build web. La configuración elegida funciona con el plan Spark
+y la cuota gratuita de Gemini Developer API.
 
-| Categoría | Tecnología |
-|-----------|-----------|
-| **Framework** | Flutter (Dart 3) |
-| **Autenticación** | Firebase Auth |
-| **Base de datos** | Firebase Firestore |
-| **IA** | Google Gemini 2.5 Flash |
-| **Estado** | Provider + ChangeNotifier |
-| **Navegación** | GoRouter |
-| **Gráficos** | fl_chart |
-| **Persistencia local** | SharedPreferences |
+Consulta [la guía de configuración de IA](docs/ai.md) para activar el servicio,
+App Check y el modo de usuarios autenticados.
 
----
+## Tecnologías
 
-## ⚙️ Instalación
+| Área | Tecnología |
+|---|---|
+| Aplicación | Flutter y Dart 3 |
+| Autenticación | Firebase Auth |
+| Base de datos | Cloud Firestore |
+| IA | Firebase AI Logic + Gemini 3.5 Flash |
+| Protección | Firebase App Check |
+| Estado | Provider + ChangeNotifier |
+| Navegación | GoRouter |
+| Gráficos | fl_chart |
+| Persistencia local | SharedPreferences |
 
-### Requisitos previos
+## Puesta en marcha
 
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) 3.x
-- Proyecto en [Firebase Console](https://console.firebase.google.com) con Auth y Firestore habilitados
-- API Key de [Google AI Studio](https://aistudio.google.com) (Gemini)
-
-### Pasos
+Requisitos: Flutter 3.44 o posterior y un proyecto Firebase con Authentication y
+Firestore habilitados.
 
 ```bash
-# 1. Clona el repositorio
-git clone https://github.com/tu-usuario/stronger.git
-cd stronger
-
-# 2. Instala las dependencias
+git clone https://github.com/marwix127/Stronger.git
+cd Stronger
 flutter pub get
-
-# 3. Configura las variables de entorno
-cp variables.env.example variables.env
-# Edita variables.env y añade tu GEMINI_API_KEY
-
-# 4. Añade tu google-services.json de Firebase
-# android/app/google-services.json
-
-# 5. Ejecuta la app
 flutter run
 ```
 
-### Variables de entorno
+No se necesita `variables.env`, una API key de Gemini ni Firebase Cloud
+Functions. Los archivos de configuración generados por FlutterFire contienen
+identificadores públicos de Firebase, no secretos de Gemini.
 
-Crea un archivo `variables.env` en la raíz del proyecto:
+Para web hay que proporcionar la clave pública del proveedor de App Check:
 
-```env
-GEMINI_API_KEY=tu_api_key_aqui
+```bash
+flutter run -d chrome --dart-define=RECAPTCHA_SITE_KEY=public_site_key
 ```
 
----
+## Calidad
 
-## 📁 Estructura del proyecto
-
+```bash
+flutter analyze
+flutter test
+flutter build web --release --dart-define=RECAPTCHA_SITE_KEY=public_site_key
 ```
+
+La suite cubre modelos, servicios de Firestore, formateo seguro del contexto,
+validación de respuestas estructuradas y recuperación de fatiga.
+
+## Estructura principal
+
+```text
 lib/
-├── models/              # Modelos de datos
-├── infrastructure/
-│   └── services/        # Firebase, Gemini, gráficos
-├── UI/
-│   ├── pages/           # Pantallas
-│   └── widgets/         # Componentes reutilizables
-├── theme/               # Temas claro y oscuro
-└── router.dart          # Configuración de rutas
+├── models/                        # Entidades de dominio
+├── infrastructure/services/
+│   ├── firebase/                  # Auth y persistencia
+│   ├── coach_service.dart         # Coach mediante Firebase AI Logic
+│   └── muscle_fatigue_service.dart
+├── UI/pages/                      # Pantallas
+├── UI/widgets/                    # Componentes reutilizables
+├── theme/                         # Temas claro y oscuro
+└── router.dart                    # Rutas y protección de navegación
+test/                              # Tests unitarios y de servicios
+docs/                              # Configuración y material de portfolio
 ```
 
----
+## Licencia
 
-## 📄 Licencia
-
-Este proyecto está bajo la licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+Distribuido bajo la licencia MIT. Consulta [LICENSE](LICENSE).

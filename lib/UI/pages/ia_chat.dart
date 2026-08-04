@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../infrastructure/services/gemini_service.dart';
+import '../../infrastructure/services/coach_service.dart';
 
 class IAChatPage extends StatefulWidget {
   const IAChatPage({super.key});
@@ -16,12 +16,12 @@ class _ChatPageState extends State<IAChatPage> {
   final TextEditingController _controller = TextEditingController();
   final List<Map<String, String>> _messages = [];
   final uid = FirebaseAuth.instance.currentUser?.uid;
-  final GeminiService _gemini = GeminiService();
+  final CoachService _coach = CoachService();
 
   final ScrollController _scrollController = ScrollController();
   bool _loading = false;
-  static const String _prefsKey = 'chat_messages';
   static const int _maxMessages = 100; // keep persistence bounded
+  String get _prefsKey => 'chat_messages_${uid ?? 'anonymous'}';
 
   @override
   void initState() {
@@ -35,6 +35,7 @@ class _ChatPageState extends State<IAChatPage> {
       final raw = prefs.getString(_prefsKey);
       if (raw == null) return;
       final List<dynamic> decoded = jsonDecode(raw);
+      if (!mounted) return;
       setState(() {
         _messages.clear();
         for (final e in decoded) {
@@ -91,20 +92,31 @@ class _ChatPageState extends State<IAChatPage> {
   }
 
   Future<void> _sendMessage() async {
+    if (_loading) return;
     final text = _controller.text.trim();
     if (text.isEmpty) return;
+    final history = _messages
+        .map(
+          (message) => {
+            'role': message['role'] == 'ai' ? 'assistant' : 'user',
+            'text': message['text'] ?? '',
+          },
+        )
+        .toList();
     _controller.clear();
     _addMessage({"role": "user", "text": text});
     setState(() => _loading = true);
 
     try {
-      if (uid == null) throw Exception('No user');
-      final reply = await _gemini.generateReply(text, uid: uid!);
+      if (uid == null) {
+        throw const CoachException('Inicia sesión para usar el coach.');
+      }
+      final reply = await _coach.generateReply(text, history: history);
       _addMessage({"role": "ai", "text": reply});
-    } catch (e) {
-      _addMessage({"role": "ai", "text": 'Error: $e'});
+    } on CoachException catch (error) {
+      _addMessage({"role": "ai", "text": error.message});
     } finally {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -175,12 +187,12 @@ class _ChatPageState extends State<IAChatPage> {
                         borderRadius: BorderRadius.all(Radius.circular(25)),
                       ),
                     ),
-                    onSubmitted: (_) => _sendMessage(),
+                    onSubmitted: _loading ? null : (_) => _sendMessage(),
                   ),
                 ),
                 IconButton(
                   icon: Icon(Icons.send, color: colorScheme.primary),
-                  onPressed: _sendMessage,
+                  onPressed: _loading ? null : _sendMessage,
                 ),
               ],
             ),

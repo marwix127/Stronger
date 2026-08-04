@@ -12,6 +12,9 @@
 .swiftpm/
 migrate_working_dir/
 variables.env
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
 # IntelliJ related
 *.iml
 *.ipr

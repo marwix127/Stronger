@@ -4,164 +4,226 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stronger/infrastructure/services/firebase/exercises_service.dart';
 
 void main() {
+  const uid = 'user-1';
   late FakeFirebaseFirestore fakeFirestore;
   late ExerciseService service;
 
   setUp(() {
     fakeFirestore = FakeFirebaseFirestore();
-    service = ExerciseService(db: fakeFirestore);
+    service = ExerciseService(db: fakeFirestore, getUid: () => uid);
   });
 
-  Future<DocumentReference> seedExercise(Map<String, dynamic> data) =>
-      fakeFirestore.collection('ejercicios2').add(data);
+  Future<DocumentReference<Map<String, dynamic>>> seedExercise(
+    Map<String, dynamic> data,
+  ) => fakeFirestore.collection('ejercicios2').add(data);
+
+  Map<String, dynamic> globalExercise({
+    required String name,
+    required String category,
+  }) => {
+    'nombre': name,
+    'categoria': category,
+    'uid': null,
+    'esPersonalizado': false,
+  };
+
+  Map<String, dynamic> personalExercise({
+    required String name,
+    required String category,
+    String owner = uid,
+  }) => {
+    'nombre': name,
+    'categoria': category,
+    'uid': owner,
+    'esPersonalizado': true,
+  };
 
   group('ExerciseService', () {
-    group('getUniqueCategories', () {
-      test('returns sorted unique categories', () async {
-        await seedExercise({'nombre': 'Squat', 'categoria': 'Legs'});
-        await seedExercise({'nombre': 'Deadlift', 'categoria': 'Back'});
-        await seedExercise({'nombre': 'Lunge', 'categoria': 'Legs'});
+    group('visible catalogue', () {
+      test(
+        'combines global exercises with the current user exercises',
+        () async {
+          await seedExercise(globalExercise(name: 'Squat', category: 'Legs'));
+          await seedExercise(
+            personalExercise(name: 'My Lunge', category: 'Legs'),
+          );
+          await seedExercise(
+            personalExercise(
+              name: 'Private Exercise',
+              category: 'Secret',
+              owner: 'user-2',
+            ),
+          );
 
-        final categories = await service.getUniqueCategories();
-        expect(categories, ['Back', 'Legs']);
+          final exercises = await service.getAllExercises();
+
+          expect(exercises.map((exercise) => exercise['nombre']), {
+            'Squat',
+            'My Lunge',
+          });
+        },
+      );
+
+      test('returns sorted unique visible categories', () async {
+        await seedExercise(globalExercise(name: 'Squat', category: 'Legs'));
+        await seedExercise(personalExercise(name: 'My Row', category: 'Back'));
+
+        expect(await service.getUniqueCategories(), ['Back', 'Legs']);
       });
 
-      test('returns empty list when collection is empty', () async {
-        final categories = await service.getUniqueCategories();
-        expect(categories, isEmpty);
-      });
-
-      test('ignores documents without categoria field', () async {
-        await seedExercise({'nombre': 'Exercise without category'});
-        await seedExercise({'nombre': 'Squat', 'categoria': 'Legs'});
-
-        final categories = await service.getUniqueCategories();
-        expect(categories, ['Legs']);
-      });
-    });
-
-    group('getByCategory', () {
-      test('returns only exercises from the given category', () async {
-        await seedExercise({'nombre': 'Squat', 'categoria': 'Legs'});
-        await seedExercise({'nombre': 'Bench Press', 'categoria': 'Chest'});
+      test('filters visible exercises by category and includes ids', () async {
+        await seedExercise(globalExercise(name: 'Squat', category: 'Legs'));
+        await seedExercise(
+          personalExercise(name: 'My Press', category: 'Chest'),
+        );
 
         final result = await service.getByCategory('Legs');
-        expect(result.length, 1);
-        expect(result[0]['nombre'], 'Squat');
+
+        expect(result, hasLength(1));
+        expect(result.single['nombre'], 'Squat');
+        expect(result.single['id'], isNotEmpty);
       });
 
-      test('includes document id in result', () async {
-        await seedExercise({'nombre': 'Squat', 'categoria': 'Legs'});
+      test('returns no catalogue when the user is signed out', () async {
+        final signedOutService = ExerciseService(
+          db: fakeFirestore,
+          getUid: () => null,
+        );
+        await seedExercise(globalExercise(name: 'Squat', category: 'Legs'));
 
-        final result = await service.getByCategory('Legs');
-        expect(result[0].containsKey('id'), true);
-        expect(result[0]['id'], isNotEmpty);
-      });
-
-      test('returns empty list when category has no exercises', () async {
-        final result = await service.getByCategory('Unknown');
-        expect(result, isEmpty);
-      });
-    });
-
-    group('getAllExercises', () {
-      test('returns all exercises with ids', () async {
-        await seedExercise({'nombre': 'Squat', 'categoria': 'Legs'});
-        await seedExercise({'nombre': 'Bench Press', 'categoria': 'Chest'});
-
-        final result = await service.getAllExercises();
-        expect(result.length, 2);
-        expect(result.every((e) => e.containsKey('id')), true);
-      });
-
-      test('returns empty list when collection is empty', () async {
-        final result = await service.getAllExercises();
-        expect(result, isEmpty);
+        expect(await signedOutService.getAllExercises(), isEmpty);
       });
     });
 
-    group('addCustomExercise', () {
-      test('adds exercise with esPersonalizado set to true', () async {
+    group('personal catalogue', () {
+      test('returns only the current user categories and exercises', () async {
+        await seedExercise(globalExercise(name: 'Squat', category: 'Legs'));
+        await seedExercise(personalExercise(name: 'My Row', category: 'Back'));
+        await seedExercise(
+          personalExercise(
+            name: 'Other Row',
+            category: 'Other',
+            owner: 'user-2',
+          ),
+        );
+
+        expect(await service.getPersonalCategories(), ['Back']);
+        final exercises = await service.getPersonalByCategory('Back');
+        expect(exercises.map((exercise) => exercise['nombre']), ['My Row']);
+      });
+    });
+
+    group('personal mutations', () {
+      test('adds the owner uid and personal marker', () async {
         await service.addCustomExercise({
           'nombre': 'My Exercise',
           'categoria': 'Custom',
         });
 
-        final snap = await fakeFirestore.collection('ejercicios2').get();
-        expect(snap.docs.length, 1);
-        expect(snap.docs[0]['esPersonalizado'], true);
-        expect(snap.docs[0]['nombre'], 'My Exercise');
+        final snapshot = await fakeFirestore.collection('ejercicios2').get();
+        expect(snapshot.docs.single['uid'], uid);
+        expect(snapshot.docs.single['esPersonalizado'], true);
       });
-    });
 
-    group('deleteExercise', () {
-      test('removes the document with the given id', () async {
-        final ref = await seedExercise({'nombre': 'Squat', 'categoria': 'Legs'});
+      test('rejects writes when the user is signed out', () async {
+        final signedOutService = ExerciseService(
+          db: fakeFirestore,
+          getUid: () => null,
+        );
 
-        await service.deleteExercise(ref.id);
-
-        final snap = await fakeFirestore.collection('ejercicios2').get();
-        expect(snap.docs, isEmpty);
+        expect(
+          () => signedOutService.addCustomExercise({
+            'nombre': 'My Exercise',
+            'categoria': 'Custom',
+          }),
+          throwsStateError,
+        );
       });
-    });
 
-    group('updateExercise', () {
-      test('updates fields of the given document', () async {
-        final ref = await seedExercise({'nombre': 'Squat', 'categoria': 'Legs'});
+      test('updates only an exercise owned by the current user', () async {
+        final reference = await seedExercise(
+          personalExercise(name: 'My Squat', category: 'Legs'),
+        );
 
-        await service.updateExercise(ref.id, {'nombre': 'Front Squat'});
+        await service.updateExercise(reference.id, {
+          'nombre': 'My Front Squat',
+          'uid': 'attacker',
+          'esPersonalizado': false,
+        });
 
-        final doc = await fakeFirestore.collection('ejercicios2').doc(ref.id).get();
-        expect(doc['nombre'], 'Front Squat');
-        expect(doc['categoria'], 'Legs');
+        final document = await reference.get();
+        expect(document['nombre'], 'My Front Squat');
+        expect(document['uid'], uid);
+        expect(document['esPersonalizado'], true);
       });
-    });
 
-    group('renameCategory', () {
-      test('updates categoria field on all matching documents', () async {
-        await seedExercise({'nombre': 'Squat', 'categoria': 'Legs'});
-        await seedExercise({'nombre': 'Lunge', 'categoria': 'Legs'});
-        await seedExercise({'nombre': 'Bench Press', 'categoria': 'Chest'});
+      test('rejects updating a global or another user exercise', () async {
+        final global = await seedExercise(
+          globalExercise(name: 'Squat', category: 'Legs'),
+        );
+        final other = await seedExercise(
+          personalExercise(name: 'Other', category: 'Other', owner: 'user-2'),
+        );
+
+        expect(
+          () => service.updateExercise(global.id, {'nombre': 'Changed'}),
+          throwsStateError,
+        );
+        expect(
+          () => service.updateExercise(other.id, {'nombre': 'Changed'}),
+          throwsStateError,
+        );
+      });
+
+      test('deletes only an exercise owned by the current user', () async {
+        final mine = await seedExercise(
+          personalExercise(name: 'Mine', category: 'Custom'),
+        );
+        final other = await seedExercise(
+          personalExercise(name: 'Other', category: 'Custom', owner: 'user-2'),
+        );
+
+        await service.deleteExercise(mine.id);
+
+        expect((await mine.get()).exists, false);
+        expect((await other.get()).exists, true);
+        expect(() => service.deleteExercise(other.id), throwsStateError);
+      });
+
+      test('renames only the current user category', () async {
+        final mine = await seedExercise(
+          personalExercise(name: 'Mine', category: 'Legs'),
+        );
+        final other = await seedExercise(
+          personalExercise(name: 'Other', category: 'Legs', owner: 'user-2'),
+        );
+        final global = await seedExercise(
+          globalExercise(name: 'Squat', category: 'Legs'),
+        );
 
         await service.renameCategory('Legs', 'Lower Body');
 
-        final legsSnap = await fakeFirestore
-            .collection('ejercicios2')
-            .where('categoria', isEqualTo: 'Legs')
-            .get();
-        final newSnap = await fakeFirestore
-            .collection('ejercicios2')
-            .where('categoria', isEqualTo: 'Lower Body')
-            .get();
-
-        expect(legsSnap.docs, isEmpty);
-        expect(newSnap.docs.length, 2);
+        expect((await mine.get())['categoria'], 'Lower Body');
+        expect((await other.get())['categoria'], 'Legs');
+        expect((await global.get())['categoria'], 'Legs');
       });
 
-      test('does not affect other categories', () async {
-        await seedExercise({'nombre': 'Bench Press', 'categoria': 'Chest'});
-
-        await service.renameCategory('Legs', 'Lower Body');
-
-        final chestSnap = await fakeFirestore
-            .collection('ejercicios2')
-            .where('categoria', isEqualTo: 'Chest')
-            .get();
-        expect(chestSnap.docs.length, 1);
-      });
-    });
-
-    group('deleteCategory', () {
-      test('deletes all exercises in the category', () async {
-        await seedExercise({'nombre': 'Squat', 'categoria': 'Legs'});
-        await seedExercise({'nombre': 'Lunge', 'categoria': 'Legs'});
-        await seedExercise({'nombre': 'Bench Press', 'categoria': 'Chest'});
+      test('deletes only the current user exercises in a category', () async {
+        final mine = await seedExercise(
+          personalExercise(name: 'Mine', category: 'Legs'),
+        );
+        final other = await seedExercise(
+          personalExercise(name: 'Other', category: 'Legs', owner: 'user-2'),
+        );
+        final global = await seedExercise(
+          globalExercise(name: 'Squat', category: 'Legs'),
+        );
 
         await service.deleteCategory('Legs');
 
-        final snap = await fakeFirestore.collection('ejercicios2').get();
-        expect(snap.docs.length, 1);
-        expect(snap.docs[0]['categoria'], 'Chest');
+        expect((await mine.get()).exists, false);
+        expect((await other.get()).exists, true);
+        expect((await global.get()).exists, true);
       });
     });
   });

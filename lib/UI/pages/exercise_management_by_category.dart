@@ -4,7 +4,13 @@ import 'package:go_router/go_router.dart';
 
 class ExerciseManagementByCategory extends StatefulWidget {
   final String category;
-  const ExerciseManagementByCategory({required this.category, super.key});
+  final ExerciseService? exerciseService;
+
+  const ExerciseManagementByCategory({
+    required this.category,
+    super.key,
+    this.exerciseService,
+  });
 
   @override
   State<ExerciseManagementByCategory> createState() =>
@@ -13,18 +19,21 @@ class ExerciseManagementByCategory extends StatefulWidget {
 
 class _ExerciseManagementByCategoryState
     extends State<ExerciseManagementByCategory> {
-  final _exerciseService = ExerciseService();
+  late final ExerciseService _exerciseService;
   late Future<List<Map<String, dynamic>>> _futureExercises;
 
   @override
   void initState() {
     super.initState();
+    _exerciseService = widget.exerciseService ?? ExerciseService();
     _refreshList();
   }
 
   void _refreshList() {
     setState(() {
-      _futureExercises = _exerciseService.getByCategory(widget.category);
+      _futureExercises = _exerciseService.getPersonalByCategory(
+        widget.category,
+      );
     });
   }
 

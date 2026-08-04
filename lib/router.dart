@@ -1,4 +1,4 @@
-﻿import 'package:stronger/UI/pages/add_exercise_page.dart';
+import 'package:stronger/UI/pages/add_exercise_page.dart';
 import 'package:stronger/UI/pages/exercise_management_categories.dart';
 import 'package:stronger/UI/widgets/main_scaffold.dart';
 import 'package:stronger/models/training.dart';
@@ -23,13 +23,7 @@ GoRouter createRouter(AuthStateNotifier authState) {
     refreshListenable: authState, // Se actualiza al cambiar el auth
     initialLocation: '/',
     redirect: (context, state) {
-      final loggedIn = authState.isLoggedIn;
-      final path = state.uri.toString();
-      final onAuthPage = path == '/login' || path == '/register';
-
-      if (!loggedIn && !onAuthPage) return '/login';
-      if (loggedIn && onAuthPage) return '/';
-      return null;
+      return authRedirect(loggedIn: authState.isLoggedIn, uri: state.uri);
     },
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LogInPage()),
@@ -96,4 +90,12 @@ GoRouter createRouter(AuthStateNotifier authState) {
       ),
     ],
   );
+}
+
+String? authRedirect({required bool loggedIn, required Uri uri}) {
+  final onAuthPage = uri.path == '/login' || uri.path == '/register';
+
+  if (!loggedIn && !onAuthPage) return '/login';
+  if (loggedIn && onAuthPage) return '/';
+  return null;
 }

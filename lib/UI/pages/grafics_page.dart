@@ -57,31 +57,48 @@ List<Map<String, dynamic>> calculateAverageWeightPerExercise(
 }
 
 class GraficsPage extends StatefulWidget {
-  const GraficsPage({super.key});
+  final TrainingService? trainingService;
+
+  const GraficsPage({super.key, this.trainingService});
 
   @override
   State<GraficsPage> createState() => _GraficsPageState();
 }
 
 class _GraficsPageState extends State<GraficsPage> {
-  final _trainingService = TrainingService();
+  late final TrainingService _trainingService;
   List<Training> _trainings = [];
   String? _selectedExercise;
   String _chartType = 'Volume';
   bool _loading = true;
+  bool _hasError = false;
 
   @override
   void initState() {
     super.initState();
+    _trainingService = widget.trainingService ?? TrainingService();
     _loadTrainings();
   }
 
   Future<void> _loadTrainings() async {
-    final loaded = await _trainingService.getTrainings();
     setState(() {
-      _trainings = loaded;
-      _loading = false;
+      _loading = true;
+      _hasError = false;
     });
+    try {
+      final loaded = await _trainingService.getTrainings();
+      if (!mounted) return;
+      setState(() {
+        _trainings = loaded;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _hasError = true;
+        _loading = false;
+      });
+    }
   }
 
   List<String> _getAllExercises() {
@@ -98,6 +115,22 @@ class _GraficsPageState extends State<GraficsPage> {
   Widget build(BuildContext context) {
     if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (_hasError) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('No se han podido cargar los gráficos.'),
+              TextButton(
+                onPressed: _loadTrainings,
+                child: const Text('Reintentar'),
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
     final chartData = _selectedExercise == null

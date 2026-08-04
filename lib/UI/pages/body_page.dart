@@ -12,7 +12,16 @@ import 'package:stronger/models/measurement.dart';
 ///   0 → Fatiga Muscular (mapa SVG coloreado)
 ///   1 → Datos Corporales (mediciones + historial)
 class BodyPage extends StatelessWidget {
-  const BodyPage({super.key});
+  final BodyMeasurementService? measurementService;
+  final MuscleFatigueService? fatigueService;
+  final String? Function()? getUid;
+
+  const BodyPage({
+    super.key,
+    this.measurementService,
+    this.fatigueService,
+    this.getUid,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +40,12 @@ class BodyPage extends StatelessWidget {
             ],
           ),
         ),
-        body: const TabBarView(children: [_BodyDataTab(), _MuscleFatigueTab()]),
+        body: TabBarView(
+          children: [
+            _BodyDataTab(measurementService: measurementService),
+            _MuscleFatigueTab(fatigueService: fatigueService, getUid: getUid),
+          ],
+        ),
       ),
     );
   }
@@ -42,7 +56,10 @@ class BodyPage extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _MuscleFatigueTab extends StatefulWidget {
-  const _MuscleFatigueTab();
+  final MuscleFatigueService? fatigueService;
+  final String? Function()? getUid;
+
+  const _MuscleFatigueTab({this.fatigueService, this.getUid});
 
   @override
   State<_MuscleFatigueTab> createState() => _MuscleFatigueTabState();
@@ -136,7 +153,8 @@ class _MuscleFatigueTabState extends State<_MuscleFatigueTab>
     'lowerBack': ['erector_spinae_l', 'erector_spinae_r'],
   };
 
-  final _service = MuscleFatigueService();
+  late final MuscleFatigueService _service;
+  late final String? Function() _getUid;
   bool _showFront = true;
   bool _loading = true;
   Map<String, double> _scores = {};
@@ -147,11 +165,13 @@ class _MuscleFatigueTabState extends State<_MuscleFatigueTab>
   @override
   void initState() {
     super.initState();
+    _service = widget.fatigueService ?? MuscleFatigueService();
+    _getUid = widget.getUid ?? (() => FirebaseAuth.instance.currentUser?.uid);
     _loadScores();
   }
 
   Future<void> _loadScores() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
+    final uid = _getUid();
     final scores = uid != null
         ? await _service.loadCurrentScores(uid)
         : <String, double>{};
@@ -275,7 +295,9 @@ class _MuscleFatigueTabState extends State<_MuscleFatigueTab>
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _BodyDataTab extends StatefulWidget {
-  const _BodyDataTab();
+  final BodyMeasurementService? measurementService;
+
+  const _BodyDataTab({this.measurementService});
 
   @override
   State<_BodyDataTab> createState() => _BodyDataTabState();
@@ -288,7 +310,7 @@ class _BodyDataTabState extends State<_BodyDataTab>
   final _heightController = TextEditingController();
   final _fatController = TextEditingController();
   final _muscleController = TextEditingController();
-  final BodyMeasurementService _measurementService = BodyMeasurementService();
+  late final BodyMeasurementService _measurementService;
   bool _isLoading = false;
 
   @override
@@ -297,6 +319,7 @@ class _BodyDataTabState extends State<_BodyDataTab>
   @override
   void initState() {
     super.initState();
+    _measurementService = widget.measurementService ?? BodyMeasurementService();
     _loadLastHeight();
   }
 
@@ -323,6 +346,21 @@ class _BodyDataTabState extends State<_BodyDataTab>
   double? _parseMeasurement(String value) {
     final normalizedValue = value.trim().replaceAll(',', '.');
     return double.tryParse(normalizedValue);
+  }
+
+  String? _validateMeasurement(
+    String? value, {
+    bool required = false,
+    double min = 0,
+    double? max,
+  }) {
+    final text = value?.trim() ?? '';
+    if (text.isEmpty) return required ? 'Requerido' : null;
+    final parsed = _parseMeasurement(text);
+    if (parsed == null || !parsed.isFinite) return 'Número no válido';
+    if (parsed <= min) return 'Debe ser mayor que $min';
+    if (max != null && parsed > max) return 'Debe ser como máximo $max';
+    return null;
   }
 
   Future<void> _saveMeasurement() async {
@@ -420,7 +458,7 @@ class _BodyDataTabState extends State<_BodyDataTab>
                 const SizedBox(height: 12),
                 _editField(hCtrl, 'Altura (cm)'),
                 const SizedBox(height: 12),
-                _editField(fCtrl, '% Grasa'),
+                _editField(fCtrl, '% Grasa', max: 100),
                 const SizedBox(height: 12),
                 _editField(mCtrl, 'Músculo (kg)'),
               ],
@@ -462,14 +500,14 @@ class _BodyDataTabState extends State<_BodyDataTab>
     TextEditingController ctrl,
     String label, {
     bool required = false,
+    double? max,
   }) {
     return TextFormField(
       controller: ctrl,
       decoration: InputDecoration(labelText: label),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      validator: required
-          ? (v) => (v == null || v.isEmpty) ? 'Requerido' : null
-          : null,
+      validator: (value) =>
+          _validateMeasurement(value, required: required, max: max),
     );
   }
 
@@ -502,8 +540,8 @@ class _BodyDataTabState extends State<_BodyDataTab>
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      validator: (v) =>
-                          (v == null || v.isEmpty) ? 'Requerido' : null,
+                      validator: (value) =>
+                          _validateMeasurement(value, required: true),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -518,6 +556,7 @@ class _BodyDataTabState extends State<_BodyDataTab>
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
+                      validator: _validateMeasurement,
                     ),
                   ),
                 ],
@@ -536,6 +575,8 @@ class _BodyDataTabState extends State<_BodyDataTab>
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
+                      validator: (value) =>
+                          _validateMeasurement(value, max: 100),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -550,6 +591,7 @@ class _BodyDataTabState extends State<_BodyDataTab>
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
+                      validator: _validateMeasurement,
                     ),
                   ),
                 ],

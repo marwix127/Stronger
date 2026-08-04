@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:stronger/infrastructure/services/firebase/auth_service.dart';
 
 class LogInPage extends StatefulWidget {
-  const LogInPage({super.key});
+  final AuthService? authService;
+
+  const LogInPage({super.key, this.authService});
 
   @override
   State<LogInPage> createState() => _LogInPageState();
@@ -13,11 +15,17 @@ class LogInPage extends StatefulWidget {
 class _LogInPageState extends State<LogInPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _authService = AuthService();
+  late final AuthService _authService;
 
   bool _loading = false;
   bool _obscurePassword = true;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _authService = widget.authService ?? AuthService();
+  }
 
   @override
   void dispose() {

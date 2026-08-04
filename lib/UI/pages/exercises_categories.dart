@@ -4,19 +4,22 @@ import 'package:go_router/go_router.dart';
 import 'exercises_by_categories.dart';
 
 class ExercisesCategories extends StatefulWidget {
-  const ExercisesCategories({super.key});
+  final ExerciseService? exerciseService;
+
+  const ExercisesCategories({super.key, this.exerciseService});
 
   @override
   State<ExercisesCategories> createState() => _ExercisesCategoriesState();
 }
 
 class _ExercisesCategoriesState extends State<ExercisesCategories> {
-  final _exerciseService = ExerciseService();
+  late final ExerciseService _exerciseService;
   late final Future<List<String>> _categoriesFuture;
 
   @override
   void initState() {
     super.initState();
+    _exerciseService = widget.exerciseService ?? ExerciseService();
     _categoriesFuture = _exerciseService.getUniqueCategories();
   }
 
@@ -35,7 +38,12 @@ class _ExercisesCategoriesState extends State<ExercisesCategories> {
       body: FutureBuilder<List<String>>(
         future: _categoriesFuture,
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          if (snapshot.hasError) {
+            return const Center(
+              child: Text('No se han podido cargar las categorías'),
+            );
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
           final categories = snapshot.data!;
@@ -50,8 +58,10 @@ class _ExercisesCategoriesState extends State<ExercisesCategories> {
                   final nav = Navigator.of(context);
                   final exercise = await nav.push(
                     MaterialPageRoute(
-                      builder: (_) =>
-                          ExercisesByCategories(category: category),
+                      builder: (_) => ExercisesByCategories(
+                        category: category,
+                        exerciseService: _exerciseService,
+                      ),
                     ),
                   );
                   if (!mounted) return;

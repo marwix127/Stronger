@@ -1,12 +1,15 @@
-﻿import 'package:stronger/models/training.dart';
+import 'package:stronger/models/training.dart';
 import 'package:stronger/infrastructure/services/firebase/training_service.dart';
+import 'package:stronger/infrastructure/services/training_draft_store.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class TrainingHistoryPage extends StatefulWidget {
-  const TrainingHistoryPage({super.key});
+  final TrainingService? trainingService;
+  final TrainingDraftStore? draftStore;
+
+  const TrainingHistoryPage({super.key, this.trainingService, this.draftStore});
 
   @override
   State<TrainingHistoryPage> createState() => _TrainingHistoryPageState();
@@ -14,21 +17,24 @@ class TrainingHistoryPage extends StatefulWidget {
 
 class _TrainingHistoryPageState extends State<TrainingHistoryPage> {
   late Future<List<Training>> _trainingsFuture;
-  final TrainingService _trainingService = TrainingService();
+  late final TrainingService _trainingService;
+  late final TrainingDraftStore _draftStore;
   bool _hasDraft = false;
 
   @override
   void initState() {
     super.initState();
+    _trainingService = widget.trainingService ?? TrainingService();
+    _draftStore = widget.draftStore ?? SharedPreferencesTrainingDraftStore();
     _trainingsFuture = _trainingService.getTrainings();
     _checkDraft();
   }
 
   Future<void> _checkDraft() async {
-    final prefs = await SharedPreferences.getInstance();
+    final hasDraft = await _draftStore.exists();
     if (mounted) {
       setState(() {
-        _hasDraft = prefs.containsKey('training_draft');
+        _hasDraft = hasDraft;
       });
     }
   }
@@ -85,11 +91,28 @@ class _TrainingHistoryPageState extends State<TrainingHistoryPage> {
       body: FutureBuilder<List<Training>>(
         future: _trainingsFuture,
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          if (snapshot.hasError) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('No se han podido cargar los entrenamientos.'),
+                  const SizedBox(height: 8),
+                  TextButton(
+                    onPressed: () => setState(() {
+                      _trainingsFuture = _trainingService.getTrainings();
+                    }),
+                    child: const Text('Reintentar'),
+                  ),
+                ],
+              ),
+            );
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final trainings = snapshot.data!;
+          final trainings = snapshot.data ?? [];
           if (trainings.isEmpty) {
             return const Center(
               child: Text("No hay entrenamientos registrados."),

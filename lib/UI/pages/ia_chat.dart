@@ -6,7 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../infrastructure/services/coach_service.dart';
 
 class IAChatPage extends StatefulWidget {
-  const IAChatPage({super.key});
+  final CoachService? coachService;
+  final String? uid;
+
+  const IAChatPage({super.key, this.coachService, this.uid});
 
   @override
   State<IAChatPage> createState() => _ChatPageState();
@@ -15,17 +18,19 @@ class IAChatPage extends StatefulWidget {
 class _ChatPageState extends State<IAChatPage> {
   final TextEditingController _controller = TextEditingController();
   final List<Map<String, String>> _messages = [];
-  final uid = FirebaseAuth.instance.currentUser?.uid;
-  final CoachService _coach = CoachService();
+  late final String? _uid;
+  late final CoachService _coach;
 
   final ScrollController _scrollController = ScrollController();
   bool _loading = false;
   static const int _maxMessages = 100; // keep persistence bounded
-  String get _prefsKey => 'chat_messages_${uid ?? 'anonymous'}';
+  String get _prefsKey => 'chat_messages_${_uid ?? 'anonymous'}';
 
   @override
   void initState() {
     super.initState();
+    _uid = widget.uid ?? FirebaseAuth.instance.currentUser?.uid;
+    _coach = widget.coachService ?? CoachService();
     _loadMessages();
   }
 
@@ -108,7 +113,7 @@ class _ChatPageState extends State<IAChatPage> {
     setState(() => _loading = true);
 
     try {
-      if (uid == null) {
+      if (_uid == null) {
         throw const CoachException('Inicia sesión para usar el coach.');
       }
       final reply = await _coach.generateReply(text, history: history);

@@ -1,12 +1,19 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:stronger/infrastructure/services/firebase/auth_service.dart';
 import 'package:stronger/infrastructure/services/theme_notifier.dart';
 
 class MainScaffold extends StatelessWidget {
   final Widget child;
+  final AuthService? authService;
+  final ThemeNotifier? themeNotifier;
 
-  const MainScaffold({super.key, required this.child});
+  const MainScaffold({
+    super.key,
+    required this.child,
+    this.authService,
+    this.themeNotifier,
+  });
 
   static final tabs = [
     {'icon': Icons.home, 'label': 'Inicio', 'path': '/'},
@@ -17,17 +24,18 @@ class MainScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final auth = authService ?? AuthService();
     final currentLocation = GoRouterState.of(context).uri.toString();
     final selectedIndex = tabs.indexWhere(
       (tab) => (tab['path'] == currentLocation),
     );
-    final userEmail = AuthService().currentUser?.email ?? 'Usuario';
+    final userEmail = auth.currentUser?.email ?? 'Usuario';
     String appBarTitle =
         tabs[selectedIndex >= 0 ? selectedIndex : 0]['label'] as String;
 
     final colorScheme = Theme.of(context).colorScheme;
     final brightness = Theme.of(context).brightness;
-    final themeNotifier = ThemeNotifier();
+    final theme = themeNotifier ?? ThemeNotifier();
 
     return Scaffold(
       appBar: AppBar(title: Text(appBarTitle)),
@@ -44,10 +52,10 @@ class MainScaffold extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 32,
-                    backgroundImage: AuthService().currentUser?.photoURL != null
-                        ? NetworkImage(AuthService().currentUser!.photoURL!)
+                    backgroundImage: auth.currentUser?.photoURL != null
+                        ? NetworkImage(auth.currentUser!.photoURL!)
                         : null,
-                    child: AuthService().currentUser?.photoURL == null
+                    child: auth.currentUser?.photoURL == null
                         ? const Icon(Icons.person, size: 40)
                         : null,
                   ),
@@ -71,7 +79,7 @@ class MainScaffold extends StatelessWidget {
             ),
             // Switch de tema
             ValueListenableBuilder<ThemeMode>(
-              valueListenable: themeNotifier,
+              valueListenable: theme,
               builder: (context, themeMode, _) {
                 final isDark =
                     themeMode == ThemeMode.dark ||
@@ -83,7 +91,7 @@ class MainScaffold extends StatelessWidget {
                   title: const Text('Tema oscuro'),
                   trailing: Switch(
                     value: isDark,
-                    onChanged: (_) => themeNotifier.toggleTheme(brightness),
+                    onChanged: (_) => theme.toggleTheme(brightness),
                   ),
                 );
               },
@@ -93,7 +101,7 @@ class MainScaffold extends StatelessWidget {
               leading: const Icon(Icons.exit_to_app),
               title: const Text('Cerrar sesión'),
               onTap: () {
-                AuthService().signOut();
+                auth.signOut();
                 context.go('/login');
               },
             ),

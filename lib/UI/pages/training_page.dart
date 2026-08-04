@@ -1,23 +1,34 @@
-import 'dart:convert';
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:stronger/infrastructure/services/firebase/training_service.dart';
 import 'package:stronger/infrastructure/services/muscle_fatigue_service.dart';
+import 'package:stronger/infrastructure/services/training_draft_store.dart';
 import 'package:stronger/models/selected_exercise.dart';
 import 'package:stronger/models/serie.dart';
 import 'package:stronger/models/training.dart';
 import 'package:stronger/UI/widgets/exercise_card.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'exercises_categories.dart';
 
 class TrainingPage extends StatefulWidget {
   final Training? training;
   final bool loadDraft;
+  final TrainingService? trainingService;
+  final MuscleFatigueService? fatigueService;
+  final TrainingDraftStore? draftStore;
+  final String? Function()? getUid;
 
-  const TrainingPage({super.key, this.training, this.loadDraft = false});
+  const TrainingPage({
+    super.key,
+    this.training,
+    this.loadDraft = false,
+    this.trainingService,
+    this.fatigueService,
+    this.draftStore,
+    this.getUid,
+  });
 
   @override
   State<TrainingPage> createState() => _TrainingPageState();
@@ -27,10 +38,11 @@ class _TrainingPageState extends State<TrainingPage>
     with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
   final TextEditingController _nameController = TextEditingController();
   List<SelectedExercise> exercises = [];
-  final TrainingService _trainingService = TrainingService();
-  final MuscleFatigueService _fatigueService = MuscleFatigueService();
+  late final TrainingService _trainingService;
+  late final MuscleFatigueService _fatigueService;
+  late final TrainingDraftStore _draftStore;
+  late final String? Function() _getUid;
   final Map<String, List<Series>> _exerciseHints = {};
-  static const String _draftKey = 'training_draft';
 
   // true solo cuando el usuario modifica algo desde la última carga/guardado
   bool _isDirty = false;
@@ -86,6 +98,10 @@ class _TrainingPageState extends State<TrainingPage>
   @override
   void initState() {
     super.initState();
+    _trainingService = widget.trainingService ?? TrainingService();
+    _fatigueService = widget.fatigueService ?? MuscleFatigueService();
+    _draftStore = widget.draftStore ?? SharedPreferencesTrainingDraftStore();
+    _getUid = widget.getUid ?? (() => FirebaseAuth.instance.currentUser?.uid);
     WidgetsBinding.instance.addObserver(this);
     _initializeControllers();
     _initializeExercises();
@@ -166,12 +182,7 @@ class _TrainingPageState extends State<TrainingPage>
 
   Future<void> _saveDraft() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final draft = {
-        'name': _nameController.text,
-        'exercises': exercises.map((e) => e.toMap()).toList(),
-      };
-      await prefs.setString(_draftKey, jsonEncode(draft));
+      await _draftStore.save(_nameController.text, exercises);
       _isDirty = false; // tras guardar el draft ya no hay cambios pendientes
     } catch (_) {
       // Ignorar errores de guardado
@@ -180,18 +191,13 @@ class _TrainingPageState extends State<TrainingPage>
 
   Future<void> _loadDraft() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(_draftKey);
-      if (raw == null) return;
-
-      final draft = jsonDecode(raw) as Map<String, dynamic>;
+      final draft = await _draftStore.load();
+      if (draft == null) return;
       if (!mounted) return;
 
       setState(() {
-        _nameController.text = draft['name'] ?? '';
-        exercises = (draft['exercises'] as List<dynamic>)
-            .map((e) => SelectedExercise.fromMap(e as Map<String, dynamic>))
-            .toList();
+        _nameController.text = draft.name;
+        exercises = draft.exercises;
         _isDirty = false; // cargar draft no cuenta como cambio del usuario
       });
       // Cargar hints para ejercicios restaurados
@@ -205,8 +211,7 @@ class _TrainingPageState extends State<TrainingPage>
 
   Future<void> _clearDraft() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_draftKey);
+      await _draftStore.clear();
     } catch (_) {
       // Ignorar errores
     }
@@ -385,7 +390,7 @@ class _TrainingPageState extends State<TrainingPage>
       await _trainingService.saveTraining(training);
       await _clearDraft(); // Limpiar borrador después de guardar
 
-      final uid = FirebaseAuth.instance.currentUser?.uid;
+      final uid = _getUid();
       if (!_isEditing && uid != null) {
         unawaited(_fatigueService.analyzeAndUpdate(training, uid));
       }

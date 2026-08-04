@@ -22,10 +22,13 @@ móviles.
 
 - Autenticación por email mediante Firebase Auth.
 - Creación, edición e historial de entrenamientos con borradores locales.
+- Catálogo base compartido y ejercicios personalizados aislados por usuario.
 - Sugerencias de series basadas en el entrenamiento anterior.
 - Gráficos de volumen, peso medio y composición corporal.
 - Mapa corporal con estimación y recuperación progresiva de fatiga muscular.
 - Coach contextual que analiza los entrenamientos y medidas del usuario.
+- Eliminación de cuenta con borrado de entrenamientos, mediciones, fatiga y
+  ejercicios personales.
 - Tema claro y oscuro y navegación declarativa con GoRouter.
 
 ## Arquitectura de IA
@@ -85,11 +88,25 @@ flutter run -d chrome --dart-define=RECAPTCHA_SITE_KEY=public_site_key
 ```bash
 flutter analyze
 flutter test
+flutter test --coverage
 flutter build web --release --dart-define=RECAPTCHA_SITE_KEY=public_site_key
 ```
 
 La suite cubre modelos, servicios de Firestore, formateo seguro del contexto,
-validación de respuestas estructuradas y recuperación de fatiga.
+validación de respuestas estructuradas, recuperación de fatiga, aislamiento de
+ejercicios personales y borrado de datos de cuenta.
+
+Las reglas de Firestore se validan contra el emulador real:
+
+```bash
+npm install --prefix firebase-tests
+firebase emulators:exec --only firestore "npm test --prefix firebase-tests"
+```
+
+Actualmente la suite Flutter contiene 153 tests unitarios, de widgets y de
+flujo, con más del 80 % de cobertura instrumentada. Las reglas añaden pruebas
+específicas de acceso anónimo, aislamiento entre usuarios y propiedad de los
+ejercicios personalizados.
 
 ## Estructura principal
 

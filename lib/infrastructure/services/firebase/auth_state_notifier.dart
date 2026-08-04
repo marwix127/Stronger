@@ -7,12 +7,15 @@ class AuthStateNotifier extends ChangeNotifier {
   bool initialized = false;
   late final StreamSubscription<User?> _subscription;
 
-  AuthStateNotifier() {
-    _subscription = FirebaseAuth.instance.authStateChanges().listen((u) {
-      user = u;
-      initialized = true;
-      notifyListeners();
-    });
+  AuthStateNotifier({Stream<User?>? authStateChanges}) {
+    _subscription =
+        (authStateChanges ?? FirebaseAuth.instance.authStateChanges()).listen((
+          u,
+        ) {
+          user = u;
+          initialized = true;
+          notifyListeners();
+        });
   }
 
   bool get isLoggedIn => user != null;

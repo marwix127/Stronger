@@ -4,7 +4,13 @@ import 'package:go_router/go_router.dart';
 
 class ExercisesByCategories extends StatefulWidget {
   final String category;
-  const ExercisesByCategories({required this.category, super.key});
+  final ExerciseService? exerciseService;
+
+  const ExercisesByCategories({
+    required this.category,
+    super.key,
+    this.exerciseService,
+  });
 
   @override
   State<ExercisesByCategories> createState() => _ExercisesByCategoriesState();
@@ -16,7 +22,8 @@ class _ExercisesByCategoriesState extends State<ExercisesByCategories> {
   @override
   void initState() {
     super.initState();
-    _exercisesFuture = ExerciseService().getByCategory(widget.category);
+    _exercisesFuture = (widget.exerciseService ?? ExerciseService())
+        .getByCategory(widget.category);
   }
 
   @override
@@ -34,7 +41,12 @@ class _ExercisesByCategoriesState extends State<ExercisesByCategories> {
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _exercisesFuture,
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          if (snapshot.hasError) {
+            return const Center(
+              child: Text('No se han podido cargar los ejercicios'),
+            );
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
           final exercises = snapshot.data!;

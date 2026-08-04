@@ -8,7 +8,6 @@ import 'package:stronger/theme/theme.dart';
 
 import 'firebase_options.dart';
 import 'infrastructure/services/firebase/auth_state_notifier.dart';
-import 'infrastructure/services/firebase/exercises_service.dart';
 import 'router.dart';
 
 Future<void> main() async {
@@ -36,7 +35,6 @@ Future<void> main() async {
   final authState = AuthStateNotifier();
   router = createRouter(authState);
 
-  ExerciseService().loadInitialExercisesIfNeeded();
   runApp(ChangeNotifierProvider.value(value: authState, child: const MyApp()));
 }
 

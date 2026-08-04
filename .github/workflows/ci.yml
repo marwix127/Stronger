@@ -141,13 +141,17 @@ jobs:
           arch: x86_64
           profile: pixel_7
           ndk: 28.2.13676358
-          script: |
-            adb reverse tcp:8080 tcp:8080
-            adb reverse tcp:9099 tcp:9099
-            device="$(adb get-serialno)"
-            flutter_bin="$(command -v flutter)"
-            test -x "${flutter_bin}"
-            npx --yes firebase-tools@15.17.0 emulators:exec \
-              --only auth,firestore \
-              --project stronger-f7c9c \
-              "${flutter_bin} test integration_test/app_test.dart -d ${device} --dart-define=USE_FIREBASE_EMULATORS=true"
+          script: bash .github/scripts/run_android_e2e.sh
+
+      - name: Upload E2E diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-e2e-diagnostics
+          path: |
+            e2e-run.log
+            e2e-flutter.log
+            firebase-debug.log
+            firestore-debug.log
+          if-no-files-found: warn
+          retention-days: 14

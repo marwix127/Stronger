@@ -37,6 +37,33 @@ void main() {
       expect(result, '- 3/8/2026: Peso: 80 kg, Grasa: 15.5 %');
     });
 
+    test('adds the muscle/fat index when the measurement is complete', () {
+      final result = AiContextFormatter.formatBodyMeasurements([
+        {
+          'date': DateTime(2026, 8, 3),
+          'weight': 80,
+          'fat_percentage': 20,
+          'muscle_mass': 60,
+        },
+        // Esquema antiguo: mismas claves que usa Measurement.fromMap.
+        {
+          'date': DateTime(2026, 8, 10),
+          'currentWeight': 82,
+          'currentBodyFat': 19,
+          'currentMuscle': 63,
+        },
+      ]);
+
+      // 60 kg de músculo / 16 kg de grasa (20% de 80).
+      expect(
+        result,
+        '- 3/8/2026: Peso: 80 kg, Grasa: 20 %, Músculo: 60 kg, '
+        'Índice M/G: 3.75\n'
+        '- 10/8/2026: Peso: 82 kg, Grasa: 19 %, Músculo: 63 kg, '
+        'Índice M/G: 4.04',
+      );
+    });
+
     test('keeps a short alternating user-first history', () {
       final result = AiContextFormatter.sanitizeHistory([
         {'role': 'assistant', 'text': 'leading model turn'},

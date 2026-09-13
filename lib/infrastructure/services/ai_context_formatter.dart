@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:stronger/infrastructure/services/body_index_calculator.dart';
 
 class AiContextFormatter {
   static const _maxContextLength = 14000;
@@ -53,20 +54,14 @@ class AiContextFormatter {
 
     for (final measurement in measurements) {
       final parts = <String>[];
-      _addNumber(parts, 'Peso', measurement['weight'], 'kg');
+      final weight = measurement['weight'] ?? measurement['currentWeight'];
+      final fat = measurement['fat_percentage'] ?? measurement['currentBodyFat'];
+      final muscle = measurement['muscle_mass'] ?? measurement['currentMuscle'];
+      _addNumber(parts, 'Peso', weight, 'kg');
       _addNumber(parts, 'Altura', measurement['height'], 'cm');
-      _addNumber(
-        parts,
-        'Grasa',
-        measurement['fat_percentage'] ?? measurement['currentBodyFat'],
-        '%',
-      );
-      _addNumber(
-        parts,
-        'Músculo',
-        measurement['muscle_mass'] ?? measurement['currentMuscle'],
-        'kg',
-      );
+      _addNumber(parts, 'Grasa', fat, '%');
+      _addNumber(parts, 'Músculo', muscle, 'kg');
+      _addBodyIndex(parts, weight: weight, fat: fat, muscle: muscle);
       if (parts.isNotEmpty) {
         buffer.writeln('- ${_date(measurement['date'])}: ${parts.join(', ')}');
       }
@@ -147,5 +142,22 @@ class AiContextFormatter {
   ) {
     final number = _number(value);
     if (number != null) parts.add('$label: ${_compact(number)} $unit');
+  }
+
+  /// Índice músculo/grasa de la medición, con la misma regla que el gráfico:
+  /// solo si hay peso, % de grasa y músculo. Dos decimales porque se mueve en
+  /// centésimas y con uno se perdería la tendencia.
+  static void _addBodyIndex(
+    List<String> parts, {
+    Object? weight,
+    Object? fat,
+    Object? muscle,
+  }) {
+    final ratio = BodyIndexCalculator.ratioOf(
+      weight: _number(weight)?.toDouble() ?? 0,
+      fat: _number(fat)?.toDouble() ?? 0,
+      muscle: _number(muscle)?.toDouble() ?? 0,
+    );
+    if (ratio != null) parts.add('Índice M/G: ${ratio.toStringAsFixed(2)}');
   }
 }

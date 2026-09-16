@@ -5,67 +5,85 @@
 ![Firebase](https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore-FFCA28?logo=firebase&logoColor=black)
 ![Gemini](https://img.shields.io/badge/Firebase_AI_Logic-Gemini_3.5-4285F4?logo=google&logoColor=white)
 [![CI](https://github.com/marwix127/Stronger/actions/workflows/ci.yml/badge.svg)](https://github.com/marwix127/Stronger/actions/workflows/ci.yml)
-![Coverage](https://img.shields.io/badge/coverage-85.0%25-brightgreen)
+![Coverage](https://img.shields.io/badge/coverage-85.6%25-brightgreen)
 
-Stronger es una aplicación Flutter para registrar entrenamientos, consultar la
-evolución física y recibir orientación personalizada mediante Gemini. Está
-planteada como un proyecto de portfolio: arquitectura clara, datos aislados por
-usuario, tests automatizados y una integración de IA segura para aplicaciones
-móviles.
+**English** · [Español](README.es.md)
 
-## Capturas
+Stronger is a Flutter app for logging workouts, tracking how your body changes
+over time, and getting guidance from an AI coach that actually knows your
+history. I built it as a portfolio project, so the emphasis is on the things
+that are easy to skip in a side project: a clear architecture, data that stays
+isolated per user, an automated test suite, and an AI integration that doesn't
+leak credentials into a mobile binary.
 
-|    Inicio     | Entrenamiento |    Chat IA    |    Progreso    |    Físico    |    Fatiga    |
+## Screenshots
+
+|    Home     | Workout |    AI Coach    |    Progress    |    Body    |    Fatigue    |
 |---|---|---|---|---|---|
-| <img src="docs/screenshots/menu.jpg" alt="Inicio" width="150"> | <img src="docs/screenshots/training.jpg" alt="Entrenamiento" width="150"> | <img src="docs/screenshots/chat.jpg" alt="Chat IA" width="150"> | <img src="docs/screenshots/graphic.jpg" alt="Progreso" width="150"> | <img src="docs/screenshots/body.jpg" alt="Físico" width="150"> | <img src="docs/screenshots/fatigue.jpg" alt="Fatiga" width="150"> |
+| <img src="docs/screenshots/menu.jpg" alt="Home" width="150"> | <img src="docs/screenshots/training.jpg" alt="Workout" width="150"> | <img src="docs/screenshots/chat.jpg" alt="AI Coach" width="150"> | <img src="docs/screenshots/graphic.jpg" alt="Progress" width="150"> | <img src="docs/screenshots/body.jpg" alt="Body" width="150"> | <img src="docs/screenshots/fatigue.jpg" alt="Fatigue" width="150"> |
 
-## Funcionalidades
+## Features
 
-- Autenticación por email mediante Firebase Auth.
-- Creación, edición e historial de entrenamientos con borradores locales.
-- Catálogo base compartido y ejercicios personalizados aislados por usuario.
-- Sugerencias de series basadas en el entrenamiento anterior.
-- Gráficos de volumen, peso medio y composición corporal.
-- Mapa corporal con estimación y recuperación progresiva de fatiga muscular.
-- Coach contextual que analiza los entrenamientos y medidas del usuario.
-- Eliminación de cuenta con borrado de entrenamientos, mediciones, fatiga y
-  ejercicios personales.
-- Tema claro y oscuro y navegación declarativa con GoRouter.
+- Email sign-in with Firebase Auth.
+- Create, edit and browse workouts, with drafts saved locally so an
+  interrupted session isn't lost.
+- A shared base catalogue of exercises, plus custom exercises that are private
+  to each user.
+- Set suggestions based on your previous session of the same exercise.
+- Charts for training volume, average weight and body composition: weight,
+  body fat, muscle mass, and a muscle-to-fat index that tells you at a glance
+  whether your composition is improving, whether you're bulking or cutting.
+- A body map that estimates muscle fatigue per muscle group and models how it
+  recovers over the following days.
+- A contextual AI coach that reads your training history and body
+  measurements before answering.
+- Account deletion that removes workouts, measurements, fatigue data and
+  custom exercises in one go.
+- Light and dark themes, and declarative navigation with GoRouter.
 
-## Arquitectura de IA
+## How the AI integration works
 
 ```text
-Flutter ── App Check + Firebase Auth ──> Firebase AI Logic ──> Gemini
+Flutter ── Firebase Auth (+ App Check where available) ──> Firebase AI Logic ──> Gemini
    │
-   └── Firestore: datos del usuario autenticado
+   └── Firestore: the signed-in user's data
 ```
 
-La aplicación utiliza el SDK oficial `firebase_ai`. Las peticiones pasan por el
-proxy de Firebase AI Logic, por lo que la credencial de Gemini no se incluye en
-el código, APK o build web. La configuración elegida funciona con el plan Spark
-y la cuota gratuita de Gemini Developer API.
+The app uses the official `firebase_ai` SDK. Requests go through the Firebase
+AI Logic proxy, so the Gemini credential never lives in the source code, the
+APK or the web build. The whole setup runs on the Spark plan and the Gemini
+Developer API free tier.
 
-Consulta [la guía de configuración de IA](docs/ai.md) para activar el servicio,
-App Check y el modo de usuarios autenticados.
+Before every reply, the coach receives a compact, sanitised summary of the
+user's recent workouts and body measurements — muscle-to-fat index included —
+and is told to treat that data as context, never as instructions.
 
-## Tecnologías
+One honest caveat: App Check protects the web build (reCAPTCHA v3) and debug
+builds, but it's deliberately left off in Android release builds. Play
+Integrity can only attest apps that Google Play recognises, and Stronger ships
+as a direct APK download. That trade-off, and what Firebase's upcoming
+enforcement deadline means for it, is written up in
+[docs/releases.md](docs/releases.md). Setting up the AI service itself is
+covered in [docs/ai.md](docs/ai.md).
 
-| Área | Tecnología |
+## Tech stack
+
+| Area | Technology |
 |---|---|
-| Aplicación | Flutter y Dart 3 |
-| Autenticación | Firebase Auth |
-| Base de datos | Cloud Firestore |
-| IA | Firebase AI Logic + Gemini 3.5 Flash |
-| Protección | Firebase App Check |
-| Estado | Provider + ChangeNotifier |
-| Navegación | GoRouter |
-| Gráficos | fl_chart |
-| Persistencia local | SharedPreferences |
+| App | Flutter and Dart 3 |
+| Authentication | Firebase Auth |
+| Database | Cloud Firestore |
+| AI | Firebase AI Logic + Gemini 3.5 Flash |
+| Abuse protection | Firebase App Check |
+| State | Provider + ChangeNotifier |
+| Navigation | GoRouter |
+| Charts | fl_chart |
+| Local persistence | SharedPreferences |
 
-## Puesta en marcha
+## Getting started
 
-La plataforma principal es Android. Para ejecutarla se necesita Flutter 3.44
-(la versión usada en CI), el Android SDK y un dispositivo o emulador disponible.
+Android is the primary platform. You'll need Flutter 3.44 (the version CI
+uses), the Android SDK, and a device or emulator to run on.
 
 ```bash
 git clone https://github.com/marwix127/Stronger.git
@@ -75,10 +93,10 @@ flutter devices
 flutter run -d DEVICE_ID
 ```
 
-El repositorio incluye la configuración nativa Android/iOS del proyecto usado
-para la demo. Para conectar un fork a otro backend hay que crear un proyecto
-Firebase, habilitar el acceso por email en Authentication y Cloud Firestore y
-regenerar la configuración:
+The repository ships with the native Android and iOS configuration of the
+demo project. To point a fork at your own backend, create a Firebase project,
+enable email sign-in in Authentication and Cloud Firestore, and regenerate the
+configuration:
 
 ```bash
 npm install --global firebase-tools@15.17.0
@@ -88,40 +106,42 @@ flutterfire configure
 firebase deploy --project PROJECT_ID --only firestore:rules
 ```
 
-Después se activa Firebase AI Logic y App Check siguiendo la
-[guía de configuración de IA](docs/ai.md). No se necesita `variables.env`, una
-API key de Gemini ni Firebase Cloud Functions. Los identificadores y API keys
-de cliente generados por FlutterFire identifican el proyecto Firebase, pero no
-son credenciales secretas de Gemini.
+Then enable Firebase AI Logic and App Check following the
+[AI setup guide](docs/ai.md). There's no `variables.env`, no Gemini API key to
+manage and no Cloud Functions to deploy. The client identifiers and API keys
+that FlutterFire generates identify the Firebase project; they're not Gemini
+secrets.
 
-### Plataformas
+### Platforms
 
-| Plataforma | Estado |
+| Platform | Status |
 |---|---|
-| Android | Plataforma principal; compilación y E2E automatizados en CI |
-| iOS | Configuración nativa incluida, sin validación automática en CI |
-| Web, Windows y macOS | Requieren ejecutar `flutterfire configure` antes de usarse |
-| Linux | Firebase no está configurado |
+| Android | Primary platform; build and E2E run automatically in CI |
+| iOS | Native configuration included, no automated validation in CI |
+| Web, Windows and macOS | Run `flutterfire configure` before first use |
+| Linux | Firebase not configured |
 
-Web necesita además la clave pública del proveedor de App Check:
+Web also needs the public site key of the App Check provider:
 
 ```bash
 flutter run -d chrome --dart-define=RECAPTCHA_SITE_KEY=public_site_key
 ```
 
-## Distribución
+## Releases
 
-La app se descarga como APK desde las
-[releases del repositorio](../../releases); no está publicada en Google Play, así
-que se instala manualmente y no se actualiza sola.
+The app is distributed as an APK from the
+[repository releases](../../releases). It isn't on Google Play, so it's
+installed manually and doesn't update itself.
 
-Publicar una versión es empujar una etiqueta: `git tag v2.1.0 && git push
---tags`. A partir de ahí el workflow `release.yml` valida, compila, firma y sube
-el APK. El proceso completo —generar el keystore, los secrets que consume el
-workflow y por qué App Check debe quedarse sin forzar fuera de Play— está en la
-[guía de publicación](docs/releases.md).
+Publishing a version is pushing a tag: `git tag v2.1.0 && git push --tags`.
+From there, the `release.yml` workflow checks that the tag matches `pubspec.yaml`,
+runs the analyzer and the test suite, builds and signs the APK, verifies it
+isn't signed with debug keys, and attaches it to a GitHub release. The full
+process — generating the keystore, the secrets the workflow expects, and the
+App Check trade-off mentioned above — lives in the
+[release guide](docs/releases.md).
 
-## Calidad
+## Quality
 
 ```bash
 flutter analyze
@@ -130,15 +150,15 @@ flutter test --coverage
 flutter build apk --debug
 ```
 
-La suite cubre modelos, servicios de Firestore, formateo seguro del contexto,
-validación de respuestas estructuradas, recuperación de fatiga, aislamiento de
-ejercicios personales y borrado de datos de cuenta.
+The suite covers the domain models, the Firestore services, safe formatting of
+the AI context, validation of structured responses, fatigue recovery, isolation
+of custom exercises, and account data deletion.
 
-Los flujos críticos se recorren además mediante un E2E Android aislado contra
-Firebase Emulator Suite. Consulta la [estrategia de pruebas](docs/testing.md)
-para ver su alcance, garantías de seguridad y ejecución local.
+Critical flows are also exercised end to end on Android against an isolated
+Firebase Emulator Suite. The [testing strategy](docs/testing.md) describes
+what that covers, the safety guarantees, and how to run it locally.
 
-Las reglas de Firestore se validan contra el emulador real:
+Firestore security rules are validated against the real emulator:
 
 ```bash
 npm ci --prefix firebase-tests
@@ -146,37 +166,38 @@ npx --yes firebase-tools@15.17.0 emulators:exec --only firestore \
   --project stronger-rules-test "npm test --prefix firebase-tests"
 ```
 
-Actualmente la suite Flutter contiene 168 tests unitarios, de widgets y de
-flujo, con un 85,0 % de cobertura instrumentada. Se añade un escenario E2E
-Android y 9 pruebas de reglas para acceso anónimo, aislamiento entre usuarios y
-propiedad de los ejercicios personalizados.
+At the time of writing the Flutter suite holds 181 unit, widget and flow
+tests with 85.6% instrumented line coverage, plus one Android E2E scenario and
+9 rules tests covering anonymous access, isolation between users, and
+ownership of custom exercises.
 
-GitHub Actions ejecuta en cada `push` y `pull request` el análisis estático, la
-suite Flutter, un umbral mínimo del 80 % de cobertura, una compilación APK
-debug, las pruebas de reglas y el E2E sobre un emulador Android limpio. Las
-etiquetas `v*` disparan además el workflow de publicación.
+GitHub Actions runs static analysis, the Flutter suite, an 80% coverage gate,
+a debug APK build, the rules tests and the E2E on a clean Android emulator on
+every `push` and `pull request`. Tags matching `v*` additionally trigger the
+release workflow.
 
-## Estructura principal
+## Project structure
 
 ```text
 lib/
-├── models/                        # Entidades de dominio
+├── models/                        # Domain entities
 ├── infrastructure/services/
-│   ├── firebase/                  # Auth y persistencia
-│   ├── coach_service.dart         # Coach mediante Firebase AI Logic
+│   ├── firebase/                  # Auth and persistence
+│   ├── coach_service.dart         # AI coach via Firebase AI Logic
+│   ├── body_index_calculator.dart # Muscle-to-fat index
 │   └── muscle_fatigue_service.dart
-├── UI/pages/                      # Pantallas
-├── UI/widgets/                    # Componentes reutilizables
-├── theme/                         # Temas claro y oscuro
-└── router.dart                    # Rutas y protección de navegación
-test/                              # Tests unitarios, de widgets y de flujos
-integration_test/                  # Escenario E2E Android
-firebase-tests/                    # Pruebas de reglas con Emulator Suite
-firestore.rules                    # Autorización y aislamiento de datos
-.github/workflows/                 # Integración continua
-docs/                              # Configuración y material de portfolio
+├── UI/pages/                      # Screens
+├── UI/widgets/                    # Reusable components
+├── theme/                         # Light and dark themes
+└── router.dart                    # Routes and navigation guards
+test/                              # Unit, widget and flow tests
+integration_test/                  # Android E2E scenario
+firebase-tests/                    # Rules tests against the Emulator Suite
+firestore.rules                    # Authorisation and data isolation
+.github/workflows/                 # Continuous integration and releases
+docs/                              # Setup guides and portfolio material
 ```
 
-## Licencia
+## License
 
-Distribuido bajo la licencia MIT. Consulta [LICENSE](LICENSE).
+Released under the MIT License. See [LICENSE](LICENSE).

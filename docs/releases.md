@@ -87,17 +87,40 @@ Si algo falla, no se publica nada: borra la etiqueta (`git tag -d v2.1.0` y
 
 ## App Check y la distribución fuera de Play
 
-En release, [`main.dart`](../lib/main.dart) activa App Check con
-`AndroidPlayIntegrityProvider`. **Play Integrity exige que la app la reconozca
-Google Play**, así que en un APK instalado a mano la atestación no se supera y
-Firebase no emite token de App Check.
+**Play Integrity solo atesta apps que Google Play reconoce.** En un APK
+instalado a mano la atestación devuelve `403 App attestation failed`, y como
+`firebase_ai` pide el token de App Check sin capturar el error, la petición al
+coach ni siquiera llegaba a enviarse.
 
-Consecuencia práctica: si App Check está *enforced* en la consola de Firebase,
-la app publicada aquí verá rechazadas sus peticiones a Firestore y al coach IA.
-Mientras la distribución sea por descarga directa, App Check debe quedarse en
-modo **monitorización** (sin forzar) para Cloud Firestore y Firebase AI, en
-*Firebase console → App Check → APIs*.
+Por eso [`main.dart`](../lib/main.dart) **no activa App Check en las release de
+Android**: al no registrarse el servicio, `firebase_ai` no lo consulta y la
+petición sale sin cabecera. En debug se sigue usando `AndroidDebugProvider`
+(hay que registrar el token en la consola) y en web `ReCaptchaV3Provider`.
+
+Para que el backend acepte esas peticiones sin token, Firebase AI Logic debe
+quedarse **sin imponer** en *Firebase console → Security → App Check*,
+desplegando la fila del producto y pulsando *Unenforce*. Cloud Firestore no
+está impuesto y no hace falta tocarlo.
 
 Es una renuncia consciente de protección antiabuso a cambio de poder distribuir
-fuera de Play. La alternativa real es subir la app a una pista de testing
-interna de Play, que es justamente lo que aquí se ha descartado.
+fuera de Play: quien extraiga la configuración del APK podría llamar a Gemini
+contra la cuota del proyecto.
+
+### Fecha límite: 2 de noviembre de 2026
+
+Según la
+[documentación de Firebase AI Logic](https://firebase.google.com/docs/ai-logic/app-check),
+a partir de esa fecha App Check pasa a ser **obligatorio** para Firebase AI
+Logic y no podrá desactivarse. Ese día un APK distribuido desde el repositorio
+dejará de poder usar el coach tal y como está ahora.
+
+Las salidas, por orden de esfuerzo:
+
+1. **`AndroidReCaptchaProvider`** — el plugin `firebase_app_check` lo expone y,
+   a diferencia de Play Integrity, reCAPTCHA no exige que Google Play reconozca
+   la app. Requiere una clave de reCAPTCHA Enterprise en Google Cloud. Es la vía
+   más prometedora y está pendiente de probar.
+2. **Mover la llamada de IA a una Cloud Function** autenticada con el token de
+   Firebase Auth del usuario, sacando `firebase_ai` del cliente.
+3. **Publicar en Google Play**, aunque sea en una pista de testing interna, que
+   es lo que se descartó al elegir esta forma de distribución.

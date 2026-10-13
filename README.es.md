@@ -3,7 +3,7 @@
 ![Flutter](https://img.shields.io/badge/Flutter-3.44-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-3-0175C2?logo=dart&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore-FFCA28?logo=firebase&logoColor=black)
-![Gemini](https://img.shields.io/badge/Firebase_AI_Logic-Gemini_3.5-4285F4?logo=google&logoColor=white)
+![Gemini](https://img.shields.io/badge/Firebase_AI_Logic-Gemini_3.6-4285F4?logo=google&logoColor=white)
 [![CI](https://github.com/marwix127/Stronger/actions/workflows/ci.yml/badge.svg)](https://github.com/marwix127/Stronger/actions/workflows/ci.yml)
 ![Coverage](https://img.shields.io/badge/coverage-85.6%25-brightgreen)
 
@@ -66,7 +66,7 @@ App Check y el modo de usuarios autenticados.
 | Aplicación | Flutter y Dart 3 |
 | Autenticación | Firebase Auth |
 | Base de datos | Cloud Firestore |
-| IA | Firebase AI Logic + Gemini 3.5 Flash |
+| IA | Firebase AI Logic + Gemini 3.6 Flash |
 | Protección | Firebase App Check |
 | Estado | Provider + ChangeNotifier |
 | Navegación | GoRouter |

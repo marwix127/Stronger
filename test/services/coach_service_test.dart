@@ -170,6 +170,31 @@ void main() {
       );
     });
 
+    test('maps overloaded service errors', () async {
+      aiClient.error = ServerException('The model is overloaded.');
+      await expectCoachError(
+        createService().generateReply('Hola'),
+        'El servicio de IA está saturado ahora mismo. Inténtalo de nuevo en unos minutos.',
+      );
+    });
+
+    test('maps retired model errors', () async {
+      aiClient.error = ServerException('models/gemini-old is not found');
+      await expectCoachError(
+        createService().generateReply('Hola'),
+        'El modelo de IA configurado ya no está disponible. Hay que actualizar la aplicación.',
+      );
+    });
+
+    test('maps App Check errors', () async {
+      aiClient.error = ServerException('Firebase App Check token is invalid.');
+      await expectCoachError(
+        createService().generateReply('Hola'),
+        'No se ha podido verificar la aplicación con Firebase. '
+        'Cierra sesión y vuelve a entrar o actualiza la aplicación.',
+      );
+    });
+
     test('maps Firebase AI errors without leaking technical details', () async {
       aiClient.error = FirebaseAIException('sensitive detail');
       await expectCoachError(

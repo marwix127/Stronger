@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:stronger/infrastructure/services/ai_model_config.dart';
 import 'package:stronger/infrastructure/services/theme_notifier.dart';
 import 'package:stronger/theme/theme.dart';
 
@@ -31,6 +34,9 @@ Future<void> main() async {
     } catch (error, stackTrace) {
       debugPrint('App Check activation failed: $error\n$stackTrace');
     }
+    // Sin bloquear el arranque: mientras llega la configuración se usan los
+    // últimos modelos activados o los valores por defecto.
+    unawaited(AiModelConfig.instance.initialize());
   }
 
   final authState = AuthStateNotifier();

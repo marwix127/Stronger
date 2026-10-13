@@ -14,8 +14,46 @@ Gemini en el repositorio.
 5. En **AI Logic > Settings**, activa el modo que exige usuarios autenticados.
 6. Revisa y ajusta los límites de peticiones por usuario.
 
-La aplicación usa `gemini-3.5-flash`. Si el servicio no está activado, el chat
-mostrará un mensaje de configuración en lugar de un error técnico.
+## Modelos, reintentos y respaldo
+
+Los modelos por defecto están en
+`lib/infrastructure/services/ai_model_config.dart`:
+
+| Uso | Parámetro de Remote Config | Modelo principal | Respaldo |
+|---|---|---|---|
+| Coach | `coach_models` | `gemini-3.6-flash` | `gemini-3.5-flash-lite` |
+| Fatiga muscular | `muscle_fatigue_models` | `gemini-3.5-flash-lite` | `gemini-3.6-flash` |
+
+### Cambiar de modelo sin publicar una versión
+
+1. En Firebase Console, abre **Run > Remote Config**.
+2. Crea el parámetro `coach_models` o `muscle_fatigue_models` de tipo
+   **String**.
+3. Escribe los modelos en orden de preferencia, separados por comas. Por
+   ejemplo: `gemini-3.8-flash,gemini-3.6-flash`.
+4. Publica los cambios.
+
+La aplicación descarga la configuración al arrancar, como mucho una vez por
+hora, y la aplica en cuanto llega. Los modelos por defecto se añaden siempre al
+final de la lista y los nombres no válidos se descartan, así que un error en la
+consola no deja la IA sin servicio. Si Remote Config no responde, se usan los
+últimos valores descargados o los modelos por defecto. Con los emuladores de
+Firebase no se consulta Remote Config.
+
+`AiModelRunner` (`lib/infrastructure/services/ai_model_runner.dart`) clasifica
+cada error de Firebase AI Logic y actúa según la causa:
+
+- **Saturación** (5xx, `UNAVAILABLE`): reintenta tras 1 s y 2 s y, si sigue
+  fallando, pasa al modelo de respaldo.
+- **Modelo retirado** o **cuota agotada**: pasa directamente al respaldo.
+- **App Check, autenticación** o **servicio sin activar**: falla sin reintentos.
+
+El chat muestra un mensaje distinto para cada causa. El error técnico completo
+se registra con `debugPrint` (`AI request with <modelo> failed (<causa>)`) y se
+puede consultar en la consola de depuración o con `adb logcat`.
+
+Antes de cambiar un modelo, consulta la
+[lista de modelos retirados](https://ai.google.dev/gemini-api/docs/deprecations).
 
 ## App Check
 
